@@ -3,7 +3,7 @@
 
 hauler:
   image:
-    repository: ghcr.io/rancherfederal/hauler
+    repository: ghcr.io/hauler-dev/hauler
     tag: v1.0.4
   imagePullPolicy: Always
 
@@ -32,7 +32,7 @@ haulerJobs:
   hauls:
     enabled: true
     artifacts:
-      - path: https://raw.githubusercontent.com/rancherfederal/hauler/main/testdata/haul.tar.zst
+      - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/haul.tar.zst
         name: haul.tar.zst
       # - path: /path/to/additional-hauls.tar.zst
       #   name: additional-hauls.tar.zst
@@ -40,7 +40,7 @@ haulerJobs:
   manifests:
     enabled: true
     artifacts:
-      - path: https://raw.githubusercontent.com/rancherfederal/hauler/main/testdata/hauler-manifest.yaml
+      - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/hauler-manifest.yaml
         name: hauler-manifest.yaml
       # - path: /path/to/additional-manifests.yaml
       #   name: additional-manifests.yaml

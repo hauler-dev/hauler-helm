@@ -47,7 +47,7 @@ jobs:
             if [ -z "${package:-}" ]; then
               break
             fi
-            helm push "${package}" oci://ghcr.io/${{ github.repository_owner }}/charts
+            helm push "${package}" oci://ghcr.io/${{ github.repository_owner }}
           done
 
       - name: Push Chart(s) to DockerHub Container Registry
@@ -56,5 +56,5 @@ jobs:
             if [ -z "${package:-}" ]; then
               break
             fi
-            helm push "${package}" oci://docker.io/hauler/charts
+            helm push "${package}" oci://docker.io/hauler
           done
