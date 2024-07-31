@@ -24,13 +24,13 @@ helm repo update
 #### via GitHub Container Registry
 
 ```bash
-ghcr.io/hauler-dev/charts/hauler
+ghcr.io/hauler-dev/hauler-helm
 ```
 
 #### via Dockerhub Container Registry
 
 ```bash
-docker.io/hauler/charts/hauler
+docker.io/hauler/hauler-helm
 ```
 
 ### Adding the Helm Chart via Rancher Manager

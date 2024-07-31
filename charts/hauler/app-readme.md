@@ -4,7 +4,7 @@
 
 | Type        | Chart Version | App Version |
 | ----------- | ------------- | ----------- |
-| application | `1.0.4`       | `1.0.4`     |
+| application | `1.0.5`       | `1.0.5`     |
 
 ## Installing the Chart
 
@@ -20,13 +20,13 @@ helm upgrade -i hauler hauler-helm/hauler -n hauler-system -f values.yaml
 #### via GitHub Container Registry
 
 ```bash
-helm upgrade -i hauler oci://ghcr.io/hauler-dev/charts/hauler -n hauler-system -f values.yaml
+helm upgrade -i hauler oci://ghcr.io/hauler-dev/hauler-helm -n hauler-system -f values.yaml
 ```
 
 #### via DockerHub Container Registry
 
 ```bash
-helm upgrade -i hauler oci://docker.io/hauler/charts/hauler -n hauler-system -f values.yaml
+helm upgrade -i hauler oci://docker.io/hauler/hauler-helm -n hauler-system -f values.yaml
 ```
 
 ## Helm Chart Deployment Status
