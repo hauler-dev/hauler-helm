@@ -4,7 +4,7 @@
 
 | Type        | Chart Version | App Version |
 | ----------- | ------------- | ----------- |
-| application | `1.0.6`       | `1.0.6`     |
+| application | `1.0.7`       | `1.0.7`     |
 
 ## Installing the Chart
 

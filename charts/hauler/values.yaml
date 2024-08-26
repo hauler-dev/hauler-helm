@@ -3,8 +3,8 @@
 
 hauler:
   image:
-    repository: ghcr.io/hauler-dev/hauler
-    tag: v1.0.6
+    repository: hauler/hauler
+    tag: v1.0.7
   imagePullPolicy: Always
 
   initContainers:
@@ -17,7 +17,7 @@ hauler:
   data:
     pvc:
       accessModes: ReadWriteMany
-      storageClass: longhorn # optional... will use default storage class
+      # storageClass: longhorn # optional... will use default storage class
       storageRequest: 48Gi # recommended size of 3x the artifact(s)
 
 # Helm Chart Values for the Hauler Jobs
@@ -25,8 +25,8 @@ hauler:
 
 haulerJobs:
   image:
-    repository: ghcr.io/hauler-dev/hauler-debug
-    tag: v1.0.6
+    repository: hauler/hauler-debug
+    tag: v1.0.7
   imagePullPolicy: Always
 
   hauls:
