@@ -2,6 +2,17 @@ apiVersion: v1
 entries:
   hauler-helm:
   - apiVersion: v2
+    appVersion: 1.1.0
+    created: "2024-10-04T22:41:13.366407334Z"
+    description: Hauler Helm Chart - Airgap Swiss Army Knife
+    digest: 1035ea15e4d4ce6745100333c0fd7de30c8efa5d7bf187e0ef9ec87c0957c277
+    icon: https://raw.githubusercontent.com/hauler-dev/hauler/main/static/rgs-hauler-logo-icon.svg
+    name: hauler-helm
+    type: application
+    urls:
+    - https://github.com/hauler-dev/hauler-helm/releases/download/hauler-helm-1.1.0/hauler-helm-1.1.0.tgz
+    version: 1.1.0
+  - apiVersion: v2
     appVersion: 1.0.8
     created: "2024-09-19T16:47:32.917548919Z"
     description: Hauler Helm Chart - Airgap Swiss Army Knife
@@ -45,4 +56,4 @@ entries:
     urls:
     - https://github.com/hauler-dev/hauler-helm/releases/download/hauler-helm-1.0.4/hauler-helm-1.0.4.tgz
     version: 1.0.4
-generated: "2024-09-19T16:47:32.917565189Z"
+generated: "2024-10-04T22:41:13.3664264Z"
