@@ -4,7 +4,7 @@
 hauler:
   image:
     repository: hauler/hauler
-    tag: v1.1.0
+    tag: 1.1.0
   imagePullPolicy: Always
 
   initContainers:
@@ -26,7 +26,7 @@ hauler:
 haulerJobs:
   image:
     repository: hauler/hauler-debug
-    tag: v1.1.0
+    tag: 1.1.0
   imagePullPolicy: Always
 
   hauls:
