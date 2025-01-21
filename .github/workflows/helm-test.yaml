@@ -42,7 +42,7 @@ jobs:
 
       - name: Create k3d cluster
         if: steps.list-changed.outputs.changed == 'true'
-        uses: AbsaOSS/k3d-aciton@v2
+        uses: AbsaOSS/k3d-action@v2
         with:
           cluter-name: "helm-cluster"
 
