@@ -48,4 +48,11 @@ jobs:
 
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
-        run: ct install --target-branch ${{ github.event.repository.default_branch }}
+        run: ct install --target-branch ${{ github.event.repository.default_branch }} --skip-clean-up --namespace helm-test
+
+      - name: Get debug output
+        run: |
+          REG_IP=$(kubectl get svc -n helm-test hauler-registry -ojsonpath='{.spec.clusterIP}')
+          curl http://$REG_IP/v2/_catalog
+          kubectl get po -A
+          ls -lha /var/tmp
