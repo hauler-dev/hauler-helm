@@ -48,7 +48,7 @@ jobs:
 
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
-        run: ct install --target-branch ${{ github.event.repository.default_branch }} --skip-clean-up --namespace helm-test
+        run: ct install --target-branch ${{ github.event.repository.default_branch }} --skip-clean-up --namespace helm-test --helm-extra-args='--create-namespace'
 
       - name: Get debug output
         run: |
