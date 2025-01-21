@@ -44,7 +44,7 @@ jobs:
         if: steps.list-changed.outputs.changed == 'true'
         uses: AbsaOSS/k3d-action@v2
         with:
-          cluter-name: "helm-cluster"
+          cluster-name: "helm-cluster"
 
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
