@@ -55,12 +55,14 @@ jobs:
 
       - name: Get debug output
         run: |
-          REG_IP=$(kubectl get svc -n helm-test hauler-registry -ojsonpath='{.spec.clusterIP}')
-          FILE_IP=$(kubectl get svc -n helm-test hauler-fileserver -ojsonpath='{.spec.clusterIP}')
-          echo http://$REG_IP:5000/v2/_catalog
-          curl http://$REG_IP:5000/v2/_catalog
-          echo http://$FILE_IP:8080/
-          curl http://$FILE_IP:8080/
           kubectl get po -A
           kubectl get svc -A
           ls -lha /var/tmp
+          REG_IP=$(kubectl get svc -n helm-test hauler-registry -ojsonpath='{.spec.clusterIP}')
+          FILE_IP=$(kubectl get svc -n helm-test hauler-fileserver -ojsonpath='{.spec.clusterIP}')
+          REG_POD=$(kubectl get po -n helm-test -l app=hauler-registry -ojsonpath='{.items[0].metadata.name}')
+          FILE_POD=$(kubectl get po -n helm-test -l app=hauler-fileserver -ojsonpath='{.items[0].metadata.name}')
+          echo http://$REG_IP:5000/v2/_catalog
+          kubectl debug -n helm-test $REG_POD --image=hauler/hauler-debug:1.1.1 -ti -- curl http://$REG_IP:5000/v2/_catalog
+          echo http://$FILE_IP:8080/
+          kubectl debug -n helm-test $FILE_POD --image=hauler/hauler-debug:1.1.1 -ti -- curl http://$FILE_IP:5000/v2/_catalog
