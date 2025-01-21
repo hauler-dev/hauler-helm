@@ -58,9 +58,9 @@ jobs:
           REG_IP=$(kubectl get svc -n helm-test hauler-registry -ojsonpath='{.spec.clusterIP}')
           FILE_IP=$(kubectl get svc -n helm-test hauler-fileserver -ojsonpath='{.spec.clusterIP}')
           echo http://$REG_IP:5000/v2/_catalog
-          http://$REG_IP:5000/v2/_catalog
+          curl http://$REG_IP:5000/v2/_catalog
           echo http://$FILE_IP:8080/
-          http://$FILE_IP:8080/
+          curl http://$FILE_IP:8080/
           kubectl get po -A
           kubectl get svc -A
           ls -lha /var/tmp
