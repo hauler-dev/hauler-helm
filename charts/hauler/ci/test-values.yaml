@@ -18,7 +18,8 @@ hauler:
     pvc:
       accessModes: ReadWriteMany
       # storageClass: longhorn # optional... will use default storage class
-      storageRequest: 2Gi  # recommended size of 3x the artifact(s)
+      storageRequest: 5Gi  # recommended size of 3x the artifact(s)
+      test: true
 
 # Helm Chart Values for the Hauler Jobs
 # Docs: https://rancherfederal.github.io/hauler-docs/docs/introduction/quickstart
@@ -35,7 +36,7 @@ haulerJobs:
   # "remote" refers to URL-based hauler artifacts and/or manifests
   remote:
     artifacts:
-       - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/haul.tar.zst
+      - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/haul.tar.zst
         name: remhaul.tar.zst
       # - path: /path/to/additional-hauls.tar.zst
       #   name: additional-hauls.tar.zst
@@ -47,7 +48,7 @@ haulerJobs:
   # "local" refers to the host the container/kubectl is being run on.  Use filesystem paths (hostDir) for these values.
   local:
     artifacts:
-      #- path: /usr/local/testdata/haul.tar.zst
+      # - path: /usr/local/testdata/haul.tar.zst
       #  name: haul.tar.zst
       # - path: /path/to/additional-hauls.tar.zst
       #   name: additional-hauls.tar.zst

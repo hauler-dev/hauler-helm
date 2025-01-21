@@ -19,6 +19,7 @@ hauler:
       accessModes: ReadWriteMany
       # storageClass: longhorn # optional... will use default storage class
       storageRequest: 48Gi  # recommended size of 3x the artifact(s)
+    test: false             # set to "true" for CI/test builds where there's no storage available
 
 # Helm Chart Values for the Hauler Jobs
 # Docs: https://rancherfederal.github.io/hauler-docs/docs/introduction/quickstart
