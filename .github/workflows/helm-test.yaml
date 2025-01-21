@@ -56,6 +56,7 @@ jobs:
       - name: Get debug output
         run: |
           REG_IP=$(kubectl get svc -n helm-test hauler-registry -ojsonpath='{.spec.clusterIP}')
-          curl http://$REG_IP/v2/_catalog
+          echo http://$REG_IP/v2/_catalog
           kubectl get po -A
+          kubectl get svc -A
           ls -lha /var/tmp
