@@ -98,7 +98,8 @@ spec:
               hauler store sync --files /manifests/{{ .name }} &&
             {{- end }}
             {{- end }}
-              echo hauler load completed
+              echo hauler load completed &&
+              ls -lha /store
           volumeMounts:
             {{- if and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0) }}
             - name: artifact-data
