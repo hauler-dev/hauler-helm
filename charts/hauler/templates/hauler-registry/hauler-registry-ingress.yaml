@@ -5,7 +5,20 @@ metadata:
   name: hauler-registry
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "hauler.labels" . | nindent 4 }}
+    {{- include "hauler.labels" . | nindent 4 -}}
+    {{- with .Values.hauler.labels -}}
+{{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.haulerRegistry.ingress.labels -}}
+{{ toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- with .Values.hauler.annotations -}}
+{{ toYaml . | nindent 4 }}
+    {{- end }}
+    {{- with .Values.haulerRegistry.ingress.annotations -}}
+{{ toYaml . | nindent 4 }}
+    {{- end }}
 spec:
   rules:
   - host: {{ .Values.haulerRegistry.ingress.hostname }}
@@ -25,4 +38,3 @@ spec:
     secretName: {{ .Values.haulerRegistry.ingress.tls.secretName }}
   {{- end }}
 {{- end }}
-
