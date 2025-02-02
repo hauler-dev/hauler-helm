@@ -34,16 +34,16 @@ haulerJobs:
     artifacts:
       - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/haul.tar.zst
         name: haul.tar.zst
-      # - path: /path/to/additional-hauls.tar.zst
-      #   name: additional-hauls.tar.zst
+      # - path: /path/to/haul.tar.zst
+      #   name: haul.tar.zst
 
   manifests:
     enabled: true
     artifacts:
       - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/hauler-manifest.yaml
         name: hauler-manifest.yaml
-      # - path: /path/to/additional-manifests.yaml
-      #   name: additional-manifests.yaml
+      # - path: /path/to/manifest.yaml
+      #   name: manifest.yaml
 
 # Helm Chart Values for the Hauler Fileserver
 # Docs: https://rancherfederal.github.io/hauler-docs/docs/guides-references/command-line/hauler-store#hauler-store-serve-fileserver
@@ -57,7 +57,7 @@ haulerFileserver:
     enabled: true
     hostname: fileserver.ranchers.io
     tls:
-      enabled: true
+      enabled: false
       source: secret # only supported source
       secretName: tls-certs # must be created outside of this chart
 
@@ -81,7 +81,7 @@ haulerRegistry:
     enabled: true
     hostname: registry.ranchers.io
     tls:
-      enabled: true
+      enabled: false
       source: secret # only supported source
       secretName: tls-certs # must be created outside of this chart
 
