@@ -33,36 +33,33 @@ haulerJobs:
     repository: hauler/hauler-debug
     tag: 1.1.1
   imagePullPolicy: Always
-  # "remote" refers to URL-based hauler artifacts and/or manifests
   remote:
     artifacts:
       - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/haul.tar.zst
-        name: remhaul.tar.zst
-      # - path: /path/to/additional-hauls.tar.zst
-      #   name: additional-hauls.tar.zst
+        name: remote-haul.tar.zst
+      - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/haul.tar.zst
+        name: remote-haul2.tar.zst
     manifests:
-      #- path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/hauler-manifest.yaml
-      #  name: remhauler-manifest.yaml
-      # - path: /path/to/additional-manifests.yaml
-      #   name: additional-manifests.yaml
+      - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/hauler-manifest.yaml
+        name: remhauler-manifest.yaml
+      - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/hauler-manifest.yaml
+        name: remhauler-manifest2.yaml
   # "local" refers to the host the container/kubectl is being run on.  Use filesystem paths (hostDir) for these values.
   local:
     artifacts:
-      # - path: /usr/local/testdata/haul.tar.zst
-      #  name: haul.tar.zst
-      # - path: /path/to/additional-hauls.tar.zst
-      #   name: additional-hauls.tar.zst
+      - path: /usr/local/testdata/haul.tar.zst
+        name: haul.tar.zst
+      - path: /path/to/additional-hauls.tar.zst
+        name: additional-hauls.tar.zst
     manifests:
-      # - path: /usr/local/testdata/hauler-manifest.yaml
-      #  name: hauler-manifest.yaml
-      # - path: /path/to/additional-manifests.yaml
-      #   name: additional-manifests.yaml
-   # "store" refers to a previously created hauler folder structure.  See the "-s" argument to hauler.  Only one path is acceptable
-   # store: /my/previously/created/hauler/store/dir/
+      - path: /usr/local/testdata/hauler-manifest.yaml
+        name: hauler-manifest.yaml
+      - path: /path/to/additional-manifests.yaml
+        name: additional-manifests.yaml
+    store: /tmp/store
 
 # Helm Chart Values for the Hauler Fileserver
 # Docs: https://rancherfederal.github.io/hauler-docs/docs/guides-references/command-line/hauler-store#hauler-store-serve-fileserver
-#
 
 haulerFileserver:
   enabled: true
