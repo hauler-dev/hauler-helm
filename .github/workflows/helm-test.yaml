@@ -43,7 +43,7 @@ jobs:
           cluster-name: "helm-cluster"
 
       - name: Create Namespace
-        run: kubectl create namespace helm-test ; mkdir -p /tmp/kubePV
+        run: kubectl create namespace helm-test
 
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
@@ -53,12 +53,16 @@ jobs:
         run: |
           kubectl get po -A
           kubectl get svc -A
-          ls -lha /tmp/kubePV
-          REG_IP=$(kubectl get svc -n helm-test hauler-registry -ojsonpath='{.spec.clusterIP}')
-          FILE_IP=$(kubectl get svc -n helm-test hauler-fileserver -ojsonpath='{.spec.clusterIP}')
-          REG_POD=$(kubectl get po -n helm-test -l app=hauler-registry -ojsonpath='{.items[0].metadata.name}')
-          FILE_POD=$(kubectl get po -n helm-test -l app=hauler-fileserver -ojsonpath='{.items[0].metadata.name}')
+          kubectl get pvc -Aoyaml
+          REG_IP=$(kubectl --profile=general get svc -n helm-test hauler-registry -ojsonpath='{.spec.clusterIP}')
+          FILE_IP=$(kubectl --profile=general get svc -n helm-test hauler-fileserver -ojsonpath='{.spec.clusterIP}')
+          REG_POD=$(kubectl --profile=general get po -n helm-test -l app=hauler-registry -ojsonpath='{.items[0].metadata.name}')
+          FILE_POD=$(kubectl --profile=general get po -n helm-test -l app=hauler-fileserver -ojsonpath='{.items[0].metadata.name}')
           echo http://$REG_IP:5000/v2/_catalog
-          kubectl debug -n helm-test $REG_POD --image=hauler/hauler-debug:1.1.1 -i -- curl http://$REG_IP:5000/v2/_catalog 
+          kubectl --profile=general debug -n helm-test $REG_POD --image=hauler/hauler-debug:1.1.1 -- curl -s http://$REG_IP:5000/v2/_catalog > /tmp/registry_output.txt
+          echo registry output:
+          cat /tmp/registry_output.txt
           echo http://$FILE_IP:8080/
-          kubectl debug -n helm-test $FILE_POD --image=hauler/hauler-debug:1.1.1 -i -- curl http://$FILE_IP:5000/v2/_catalog
+          kubectl --profile=general debug -n helm-test $FILE_POD --image=hauler/hauler-debug:1.1.1 -- curl -s http://$FILE_IP:8080 > /tmp/fileserver_output.txt
+          echo file output:
+          cat /tmp/fileserver_output.txt
