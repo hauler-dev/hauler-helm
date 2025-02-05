@@ -41,7 +41,9 @@ jobs:
         run: kubectl create namespace helm-test
 
       - name: Run chart-testing (install)
-        run: ct install --target-branch ${{ github.event.repository.default_branch }} --skip-clean-up --namespace helm-test --all --debug --print-config
+        run: |
+          ct install --target-branch ${{ github.event.repository.default_branch }} --skip-clean-up --namespace helm-test --all --debug --print-config &
+          kubectl get po -Aw
 
       - name: Get debug output
         run: |
