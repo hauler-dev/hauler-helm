@@ -53,12 +53,16 @@ jobs:
         run: |
           kubectl get po -A
           kubectl get svc -A
-          ls
           kubectl apply -f charts/hauler/ci/test-pod.yaml
           REG_IP=$(kubectl get svc -n helm-test hauler-registry -ojsonpath='{.spec.clusterIP}')
           FILE_IP=$(kubectl get svc -n helm-test hauler-fileserver -ojsonpath='{.spec.clusterIP}')
           REG_POD=$(kubectl get po -n helm-test -l app=hauler-registry -ojsonpath='{.items[0].metadata.name}')
           FILE_POD=$(kubectl get po -n helm-test -l app=hauler-fileserver -ojsonpath='{.items[0].metadata.name}')
+          while ! kubectl get po -n helm-test test-pod -ojsonpath='{}.status.ContainerStatuses[0].ready}' | grep true
+          do
+            echo waiting for test-pod
+            sleep 1
+          done
           echo http://$REG_IP:5000/v2/_catalog
           kubectl exec -qn helm-test test-pod -- curl http://$REG_IP:5000/v2/_catalog > /tmp/registry_output.txt
           echo registry output:
