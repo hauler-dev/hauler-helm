@@ -2,6 +2,11 @@
 # Docs: https://hauler.dev
 
 hauler:
+  # labels:
+  #   key: value
+  # annotations:
+  #   key: value
+
   image:
     repository: hauler/hauler
     tag: 1.2.0
@@ -71,11 +76,15 @@ haulerFileserver:
 
   ingress:
     enabled: true
+    # labels:
+    #   key: value
+    # annotations:
+    #   key: value
     hostname: fileserver.ranchers.io
     tls:
-      enabled: true
-      source: secret         # only supported source
-      secretName: tls-certs  # must be created outside of this chart
+      enabled: false
+      source: secret # only supported source
+      secretName: tls-certs # must be created outside of this chart
 
   service:
     enabled: true
@@ -95,11 +104,15 @@ haulerRegistry:
 
   ingress:
     enabled: true
+    # labels:
+    #   key: value
+    # annotations:
+    #   key: value
     hostname: registry.ranchers.io
     tls:
-      enabled: true
-      source: secret          # only supported source
-      secretName: tls-certs   # must be created outside of this chart
+      enabled: false
+      source: secret # only supported source
+      secretName: tls-certs # must be created outside of this chart
 
   service:
     enabled: true
