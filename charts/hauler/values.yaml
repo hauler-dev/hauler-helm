@@ -83,8 +83,8 @@ haulerFileserver:
     hostname: fileserver.ranchers.io
     tls:
       enabled: false
-      source: secret # only supported source
-      secretName: tls-certs # must be created outside of this chart
+      source: secret         # only supported source
+      secretName: tls-certs  # must be created outside of this chart
 
   service:
     enabled: true
@@ -111,8 +111,8 @@ haulerRegistry:
     hostname: registry.ranchers.io
     tls:
       enabled: false
-      source: secret # only supported source
-      secretName: tls-certs # must be created outside of this chart
+      source: secret         # only supported source
+      secretName: tls-certs  # must be created outside of this chart
 
   service:
     enabled: true
