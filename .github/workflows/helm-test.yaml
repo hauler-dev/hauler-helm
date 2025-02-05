@@ -54,15 +54,28 @@ jobs:
           kubectl get po -A
           kubectl get svc -A
           kubectl get pvc -Aoyaml
+          echo 'apiVersion: v1
+                kind: Pod
+                metadata:
+                  name: test-pod
+                  namespace: helm-test
+                  labels:
+                    app: test
+                spec:
+                  containers:
+                    - name: test-container
+                      image: busybox
+                      command: [ "sleep", "3600" ]' | kubectl apply -f -
+"
           REG_IP=$(kubectl get svc -n helm-test hauler-registry -ojsonpath='{.spec.clusterIP}')
           FILE_IP=$(kubectl get svc -n helm-test hauler-fileserver -ojsonpath='{.spec.clusterIP}')
           REG_POD=$(kubectl get po -n helm-test -l app=hauler-registry -ojsonpath='{.items[0].metadata.name}')
           FILE_POD=$(kubectl get po -n helm-test -l app=hauler-fileserver -ojsonpath='{.items[0].metadata.name}')
           echo http://$REG_IP:5000/v2/_catalog
-          kubectl exec -qn helm-test $REG_POD -- curl http://$REG_IP:5000/v2/_catalog > /tmp/registry_output.txt
+          kubectl exec -qn helm-test test-pod -- curl http://$REG_IP:5000/v2/_catalog > /tmp/registry_output.txt
           echo registry output:
           cat /tmp/registry_output.txt
           echo http://$FILE_IP:8080/
-          kubectl exec -iqn helm-test $FILE_POD -- curl http://$FILE_IP:8080 > /tmp/fileserver_output.txt
+          kubectl exec -iqn helm-test test-pod -- curl http://$FILE_IP:8080 > /tmp/fileserver_output.txt
           echo file output:
           cat /tmp/fileserver_output.txt
