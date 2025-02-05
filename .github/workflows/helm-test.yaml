@@ -48,7 +48,7 @@ jobs:
           ct install --target-branch ${{ github.event.repository.default_branch }} --skip-clean-up --namespace helm-test --all --debug --print-config &
           while true
           do
-            kubectl logs -n helm-test -f -lapp=hauler-loader
+            kubectl logs -n helm-test -f -ljob-name=hauler-loader
             sleep 1
           done
 
