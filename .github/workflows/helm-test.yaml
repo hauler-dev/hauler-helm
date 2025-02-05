@@ -53,19 +53,8 @@ jobs:
         run: |
           kubectl get po -A
           kubectl get svc -A
-          kubectl get pvc -Aoyaml
-          echo 'apiVersion: v1
-                kind: Pod
-                metadata:
-                  name: test-pod
-                  namespace: helm-test
-                  labels:
-                    app: test
-                spec:
-                  containers:
-                    - name: test-container
-                      image: busybox
-                      command: [ "sleep", "3600" ]' | kubectl apply -f -
+          ls
+          kubectl apply -f charts/hauler/ci/test-pod.yaml
           REG_IP=$(kubectl get svc -n helm-test hauler-registry -ojsonpath='{.spec.clusterIP}')
           FILE_IP=$(kubectl get svc -n helm-test hauler-fileserver -ojsonpath='{.spec.clusterIP}')
           REG_POD=$(kubectl get po -n helm-test -l app=hauler-registry -ojsonpath='{.items[0].metadata.name}')
