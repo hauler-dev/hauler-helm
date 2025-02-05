@@ -5,6 +5,13 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "hauler.labels" . | nindent 4 }}
+    {{- with .Values.hauler.labels -}}
+{{ toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- with .Values.hauler.annotations -}}
+{{ toYaml . | nindent 4 }}
+    {{- end }}
 ---
 apiVersion: rbac.authorization.k8s.io/v1
 kind: Role
@@ -13,6 +20,13 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "hauler.labels" . | nindent 4 }}
+    {{- with .Values.hauler.labels -}}
+{{ toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- with .Values.hauler.annotations -}}
+{{ toYaml . | nindent 4 }}
+    {{- end }}
 rules:
 - apiGroups: ["batch"]
   resources: ["jobs"]
@@ -25,6 +39,13 @@ metadata:
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "hauler.labels" . | nindent 4 }}
+    {{- with .Values.hauler.labels -}}
+{{ toYaml . | nindent 4 }}
+    {{- end }}
+  annotations:
+    {{- with .Values.hauler.annotations -}}
+{{ toYaml . | nindent 4 }}
+    {{- end }}
 roleRef:
   kind: Role
   name: hauler-role
