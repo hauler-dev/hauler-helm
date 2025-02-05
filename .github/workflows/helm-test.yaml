@@ -47,7 +47,7 @@ jobs:
           cluster-name: "helm-cluster"
 
       - name: Create Namespace
-        run: kubectl create namespace helm-test
+        run: kubectl create namespace helm-test ; mkdir -p /tmp/kubePV
 
       - name: Run chart-testing (install)
         if: steps.list-changed.outputs.changed == 'true'
