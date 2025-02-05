@@ -1,4 +1,4 @@
-{{- if and (or .Values.haulerJobs.remote .Values.haulerJobs.local) (or (and .Values.haulerJobs.local .Values.haulerJobs.local.path) (and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0)) (and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0))  (and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0))  ) }}
+{{- if and (or .Values.haulerJobs.remote .Values.haulerJobs.local) (or (and .Values.haulerJobs.local .Values.haulerJobs.local.store) (and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0)) (and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0))  (and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0))  ) }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -17,8 +17,9 @@ spec:
           args:
             - |
               {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.store }}
-              cp -vr /local-store/* /store/   &&
+              cp -r /local-store/* /store/   &&
               chown -R 1001:1001 /store &&
+              echo copied {{ .Values.haulerJobs.local.store }} &&
               {{- end }}
               {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts }}
               {{- range .Values.haulerJobs.local.artifacts }}
@@ -69,6 +70,11 @@ spec:
             - name: hauler-data
               mountPath: /store
           securityContext:
+            runAsUser: 0
+      containers:
+        - name: hauler-load
+          image: {{ .Values.haulerJobs.image.repository }}:{{ .Values.haulerJobs.image.tag }}
+          imagePullPolicy: {{ .Values.haulerJobs.imagePullPolicy }}
             allowPrivilegeEscalation: false
             capabilities:
               drop: ["ALL"]
@@ -85,25 +91,26 @@ spec:
             - |
             {{- if and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0) }}
             {{- range .Values.haulerJobs.remote.artifacts }}
-              hauler store load /artifacts/{{ .name }} &&
+              hauler store -s /store load /artifacts/{{ .name }} &&
             {{- end }}
             {{- end }}
             {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0) }}
             {{- range .Values.haulerJobs.local.artifacts }}
-              hauler store load /artifacts/{{ .name }} &&
+              hauler store -s /store load /artifacts/{{ .name }} &&
             {{- end }}
             {{- end }}
             {{- if and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0) }}
             {{- range .Values.haulerJobs.remote.manifests }}
-              hauler store sync --files /manifests/{{ .name }} &&
+              hauler store -s /store sync --files /manifests/{{ .name }} &&
             {{- end }}
             {{- end }}
             {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0) }}
             {{- range .Values.haulerJobs.local.manifests }}
-              hauler store sync --files /manifests/{{ .name }} &&
+              hauler store -s /store sync --files /manifests/{{ .name }} &&
             {{- end }}
             {{- end }}
-              echo hauler load completed
+              echo hauler load completed &&
+              ls -lha /store
           volumeMounts:
             {{- if and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0) }}
             - name: artifact-data

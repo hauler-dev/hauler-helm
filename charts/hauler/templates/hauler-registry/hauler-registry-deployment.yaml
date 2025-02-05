@@ -18,9 +18,10 @@ spec:
         app: hauler-registry
         {{- include "hauler.selectorLabels" . | nindent 8 }}
     spec:
-    {{- if and (or .Values.haulerJobs.remote .Values.haulerJobs.local) (or (and .Values.haulerJobs.local .Values.haulerJobs.local.path) (and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0)) (and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0))  (and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0))  ) }}
+    {{- if and (or .Values.haulerJobs.remote .Values.haulerJobs.local) (or (and .Values.haulerJobs.local .Values.haulerJobs.local.store) (and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0)) (and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0))  (and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0))  ) }}
       initContainers:
         - name: wait-for-hauler-loader
+          image: {{ .Values.hauler.initContainers.image.repository }}:{{ .Values.hauler.initContainers.image.tag }}
           imagePullPolicy: {{ .Values.hauler.initContainers.imagePullPolicy }}
           args: ["wait", "--for=condition=complete", "job", "hauler-loader", "--namespace", "{{ .Release.Namespace }}", "--timeout={{ .Values.hauler.initContainers.timeout }}"]
           securityContext:

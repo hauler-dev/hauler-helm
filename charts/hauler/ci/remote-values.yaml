@@ -4,7 +4,7 @@
 hauler:
   image:
     repository: hauler/hauler
-    tag: 1.2.0
+    tag: 1.1.1
   imagePullPolicy: Always
 
   initContainers:
@@ -16,10 +16,10 @@ hauler:
 
   data:
     pvc:
-      accessModes: ReadWriteMany
+      accessModes: ReadWriteOnce
       # storageClass: longhorn # optional... will use default storage class
-      storageRequest: 48Gi  # recommended size of 3x the artifact(s)
-    test: false             # set to "true" for CI/test builds where there's no storage available
+      storageRequest: 5Gi  # recommended size of 3x the artifact(s)
+      test: true
 
 # Helm Chart Values for the Hauler Jobs
 # Docs: https://rancherfederal.github.io/hauler-docs/docs/introduction/quickstart
@@ -31,18 +31,18 @@ hauler:
 haulerJobs:
   image:
     repository: hauler/hauler-debug
-    tag: 1.2.0
+    tag: 1.1.1
   imagePullPolicy: Always
   # "remote" refers to URL-based hauler artifacts and/or manifests
   remote:
     artifacts:
-      # - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/haul.tar.zst
-      #  name: remhaul.tar.zst
+      - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/haul.tar.zst
+        name: remhaul.tar.zst
       # - path: /path/to/additional-hauls.tar.zst
       #   name: additional-hauls.tar.zst
     manifests:
-      # - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/hauler-manifest.yaml
-      #  name: remhauler-manifest.yaml
+      - path: https://raw.githubusercontent.com/tayterz2/hauler-helm/refs/heads/squash/charts/hauler/ci/test-manifest.yaml
+        name: remhauler-manifest.yaml
       # - path: /path/to/additional-manifests.yaml
       #   name: additional-manifests.yaml
   # "local" refers to the host the container/kubectl is being run on.  Use filesystem paths (hostDir) for these values.
@@ -65,7 +65,7 @@ haulerJobs:
 #
 
 haulerFileserver:
-  enabled: false
+  enabled: true
   port: 8080  # default port for the fileserver
   replicas: 1
 
@@ -89,7 +89,7 @@ haulerFileserver:
 # Docs: https://rancherfederal.github.io/hauler-docs/docs/guides-references/command-line/hauler-store#hauler-store-serve-registry
 
 haulerRegistry:
-  enabled: false
+  enabled: true
   port: 5000      # default port for the registry
   replicas: 1
 
