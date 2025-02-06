@@ -16,17 +16,17 @@ jobs:
         with:
           version: v3.16.4
 
-      #- name: Install Python
-      #  uses: actions/setup-python@v5
-      #  with:
-      #    python-version: '3.x'
-      #    check-latest: true
+      - name: Install Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
+          check-latest: true
 
-      #- name: Set up chart-testing
-      #  uses: helm/chart-testing-action@v2.6.1
+      - name: Set up chart-testing
+        uses: helm/chart-testing-action@v2.6.1
 
-      #- name: Run chart-testing (lint)
-      #  run: ct lint --target-branch ${{ github.event.repository.default_branch }} --all
+      - name: Run chart-testing (lint)
+        run: ct lint --target-branch ${{ github.event.repository.default_branch }} --all
 
       - name: Setup k3s
         run: curl -sfL https://get.k3s.io | sh - ; mkdir ~/.kube ; sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config ; sudo chown runner ~/.kube/config
