@@ -70,6 +70,7 @@ jobs:
             echo waiting for these to run or complete:
             kubectl get po -A --no-headers | grep -v 'Running\|Completed'
             kubectl logs -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader -f -c hauler-fetch || true
+            find /tmp/hauler /tmp/tests/
             sleep 2
           done
 
