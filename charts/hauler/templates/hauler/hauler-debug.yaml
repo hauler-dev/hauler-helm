@@ -1,4 +1,4 @@
-{{- if .Values.debug.enabled }}
+{{- if .Values.hauler.debug.enabled }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
@@ -21,10 +21,10 @@ spec:
     spec:
       containers:
         - name: hauler-debug
-          image: {{ .Values.debug.image.repository }}:{{ .Values.debug.image.tag }}
-          imagePullPolicy: {{ .Values.debug.imagePullPolicy }}
-          command: {{ .Values.debug.command }}
-          args: {{ .Values.debug.args }}
+          image: {{ .Values.hauler.debug.image.repository }}:{{ .Values.hauler.debug.image.tag }}
+          imagePullPolicy: {{ .Values.hauler.debug.imagePullPolicy }}
+          command: {{ .Values.hauler.debug.command }}
+          args: {{ .Values.hauler.debug.args }}
           volumeMounts:
             - name: hauler-data
               mountPath: /store
