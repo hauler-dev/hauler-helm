@@ -36,6 +36,7 @@ jobs:
 
       - name: Wait for k3s
         run: |
+          chmod 600 /tmp/output/kubeconfig-latest.yaml
           while ! kubectl get po -n kube-system -l app.kubernetes.io/name=traefik -ojsonpath='{.items[*].status.containerStatuses[*].ready}' | grep -q true
           do
           sleep 1
@@ -46,8 +47,9 @@ jobs:
           for testvalue in $(ls charts/hauler/ci/*-values.yaml)
           do
             name=$(basename ${testvalue}| rev | cut -c13- | rev)
+            namespace=hauler-${name}
             echo $name - $testvalue
-            helm install $name charts/hauler --namespace hauler-${name} --values ${testvalue} --create-namespace
+            helm install $name charts/hauler --namespace ${namespace} --values ${testvalue} --create-namespace
           done
 
       - name: Wait for Installs/Loads
@@ -62,21 +64,21 @@ jobs:
       - name: Get debug output
         run: |
           kubectl apply -f charts/hauler/ci/test-pod.yaml
-          kubectl get po -A
-          kubectl get svc -A
-          REG_IP=$(kubectl get svc hauler-registry -ojsonpath='{.spec.clusterIP}')
-          FILE_IP=$(kubectl get svc hauler-fileserver -ojsonpath='{.spec.clusterIP}')
-          REG_POD=$(kubectl get po -l app=hauler-registry -ojsonpath='{.items[0].metadata.name}')
-          FILE_POD=$(kubectl get po -l app=hauler-fileserver -ojsonpath='{.items[0].metadata.name}')
           while ! kubectl get po test-pod -ojsonpath='{.status.containerStatuses[0].ready}' | grep true
           do
             sleep 1
           done
-          echo http://$REG_IP:5000/v2/_catalog
-          kubectl exec -q test-pod -- curl -s http://$REG_IP:5000/v2/_catalog > /tmp/registry_output.txt
-          echo registry output:
-          cat /tmp/registry_output.txt
-          echo http://$FILE_IP:8080/
-          kubectl exec -q test-pod -- curl -s http://$FILE_IP:8080 > /tmp/fileserver_output.txt
-          echo file output:
-          cat /tmp/fileserver_output.txt
+          for testvalue in $(ls charts/hauler/ci/*-values.yaml)
+          do
+            name=$(basename ${testvalue}| rev | cut -c13- | rev)
+            namespace=hauler-${name}
+            REGISTRY_URL=http://hauler-registry.${namespace}.svc.cluster.local:5000/v2/_catalog
+            echo REGISTRY_URL = $REGISTRY_URL
+            kubectl exec -q test-pod -- curl -s ${REGISTRY_URL} > /tmp/registry_output.txt
+            echo registry output:
+            cat /tmp/registry_output.txt
+            HTTP_URL=http://hauler-fileserver.${namespace}.svc.cluster.local:8080
+            echo HTTP_URL = $HTTP_URL
+            kubectl exec -q test-pod -- curl -s ${HTTP_URL} > /tmp/fileserver_output.txt
+            echo file output:
+            cat /tmp/fileserver_output.txt
