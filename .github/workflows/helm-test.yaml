@@ -36,18 +36,18 @@ jobs:
 
       - name: Wait for k3s
         run: |
-          while ! kubectl get po -n kube-system -l app.kubernetes.io/name=traefik -ojsonpath='{.items[*].status.containerStatuses[*].ready}' | grep true
+          while ! kubectl get po -n kube-system -l app.kubernetes.io/name=traefik -ojsonpath='{.items[*].status.containerStatuses[*].ready}' | grep -q true
           do
           sleep 1
           done
 
       - name: Install Test Cases
         run: |
-          for test-value in $(ls charts/hauler/ci/*-values.yaml)
+          for testvalue in $(ls charts/hauler/ci/*-values.yaml)
           do
-            name=$(basename ${test}| rev | cut -c13- | rev)
-            echo $name - $test-value
-            helm install $name charts/hauler --namespace hauler-${name} --values ${test} --kubeconfig .kube/config --create-namespace
+            name=$(basename ${testvalue}| rev | cut -c13- | rev)
+            echo $name - $testvalue
+            helm install $name charts/hauler --namespace hauler-${name} --values ${testvalue} --kubeconfig .kube/config --create-namespace
           done
 
       - name: Wait for Installs/Loads
