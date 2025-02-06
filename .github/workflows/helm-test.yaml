@@ -63,14 +63,6 @@ jobs:
           echo "Create local store"
           /tmp/hauler/hauler store -s /tmp/tests/store sync charts/hauler/ci/store-manifest.yaml
 
-      - name: debug
-        run: |
-          while ! kubectl logs -n hauler-local-manifests  -c hauler-fetch 2>&1 | grep -q "No resources\|Error from server"
-          do
-            sleep 1
-          done
-          kubectl logs -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-fetch
-        
       - name: Wait for Installs/Loads
         run: |
           while kubectl get po -A --no-headers | grep -v 'Running\|Completed'
