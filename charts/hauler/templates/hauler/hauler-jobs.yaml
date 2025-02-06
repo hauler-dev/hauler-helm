@@ -30,12 +30,12 @@ spec:
               {{- end }}
               {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts }}
               {{- range .Values.haulerJobs.local.artifacts }}
-              cp -v /tmp/local-artifact-{{ .name }} /artifacts/ &&
+              cp -va /tmp/local-artifact-{{ .name }} /artifacts/ &&
               {{- end}}
               {{- end}}
               {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.manifests }}
               {{- range .Values.haulerJobs.local.manifests }}
-              cp -v /tmp/local-manifest-{{ .name }} /manifests/ &&
+              cp -va /tmp/local-manifest-{{ .name }} /manifests/ &&
               {{- end}}
               {{- end}}
               {{- if and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts }}
