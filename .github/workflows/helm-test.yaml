@@ -45,12 +45,7 @@ jobs:
 
       - name: Run chart-testing (install)
         run: |
-          ct install --target-branch ${{ github.event.repository.default_branch }} --skip-clean-up --namespace helm-test --all --debug --print-config &
-          while true
-          do
-            kubectl logs -n helm-test -c hauler-fetch -f -ljob-name=hauler-loader
-            sleep 1
-          done
+          ct install --target-branch ${{ github.event.repository.default_branch }} --skip-clean-up --namespace helm-test --all --debug --print-config
 
       - name: Get debug output
         run: |
