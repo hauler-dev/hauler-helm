@@ -36,7 +36,6 @@ jobs:
 
       - name: Wait for k3s
         run: |
-          chmod 600 /tmp/output/kubeconfig-latest.yaml
           while ! kubectl get po -n kube-system -l app.kubernetes.io/name=traefik -ojsonpath='{.items[*].status.containerStatuses[*].ready}' | grep -q true
           do
           sleep 1
@@ -82,3 +81,4 @@ jobs:
             kubectl exec -q test-pod -- curl -s ${HTTP_URL} > /tmp/fileserver_output.txt
             echo file output:
             cat /tmp/fileserver_output.txt
+          done
