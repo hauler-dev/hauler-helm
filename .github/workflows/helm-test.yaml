@@ -67,7 +67,7 @@ jobs:
           do
             echo waiting for these to run or complete:
             kubectl get po -A --no-headers | grep -v 'Running\|Completed'
-            kubectl logs -n hauler-store -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-load || true
+            kubectl logs -n hauler-store -lapp=hauler-registry -f || true
             #kubectl get po -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader -o yaml
             sleep 5
           done
