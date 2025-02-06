@@ -53,8 +53,9 @@ jobs:
 
       - name: Download & Prep "local" Test Files
         run: |
-
-
+          mkdir -pv /tmp/tests/store
+          echo "Download local-haul.tar.zst"
+          curl -o /tmp/tests/local-haul.tar.zst https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/haul.tar.zst
           echo "Download local-manifest.yaml"
           curl -o /tmp/tests/local-manifest.yaml https://raw.githubusercontent.com/tayterz2/hauler-helm/refs/heads/main/charts/hauler/ci/test-manifest.yaml
           echo "Download hauler binary"
@@ -69,8 +70,7 @@ jobs:
             echo waiting for these to run or complete:
             kubectl get po -A --no-headers | grep -v 'Running\|Completed'
             kubectl logs -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader -f -c hauler-fetch || true
-            find /tmp/hauler /tmp/tests/
-            kubectl get po -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader -oyaml
+            kubectl get po -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader
             sleep 2
           done
 
