@@ -29,13 +29,15 @@ spec:
               echo copied {{ .Values.haulerJobs.local.store }} &&
               {{- end }}
               {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts }}
-              {{- range .Values.haulerJobs.local.artifacts }}
-              cp -v /tmp/local-artifact-{{ .name }} /artifacts/ &&
+              {{- range $index, $artifact := .Values.haulerJobs.local.artifacts }}
+              mkdir -p /artifacts/local-artifact-{{ $index }}/
+              cp -v /tmp/local-artifact-{{ $index }}/{{ $artifact.name }} /artifacts/local-artifact-{{ $index }}/ &&
               {{- end}}
               {{- end}}
               {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.manifests }}
-              {{- range .Values.haulerJobs.local.manifests }}
-              cp -v /tmp/local-manifest-{{ .name }} /manifests/ &&
+              {{- range $index, $manifest := .Values.haulerJobs.local.manifests }}
+              mkdir -p /manifests/local-manifest-{{ $index }}/
+              cp -v /tmp/local-manifest-{{ $index }}/{{ $manifest.name }} /manifests/local-manifest-{{ $index }}/ &&
               {{- end}}
               {{- end}}
               {{- if and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts }}
@@ -54,20 +56,20 @@ spec:
             - name: artifact-data
               mountPath: /artifacts
             {{- end }}
-            {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0) }}
-            {{- range .Values.haulerJobs.local.artifacts }}
-            - name: local-artifact-{{ .name }}
-              mountPath: /tmp/local-artifact-{{ .name }}
-            {{- end }}
-            {{- end }}
             {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0)) }}
             - name: manifest-data
               mountPath: /manifests
             {{- end }}
+            {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0) }}
+            {{- range $index, $artifact := .Values.haulerJobs.local.artifacts }}
+            - name: local-artifact-{{ $index }}
+              mountPath: /tmp/local-artifact-{{ $index }}
+            {{- end }}
+            {{- end }}
             {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0) }}
-            {{- range .Values.haulerJobs.local.manifests }}
-            - name: local-manifest-{{ .name }}
-              mountPath: /tmp/local-manifest-{{ .name }}
+            {{- range $index, $manifest := .Values.haulerJobs.local.manifests }}
+            - name: local-manifest-{{ $index }}
+              mountPath: /tmp/local-manifest-{{ $index }}
             {{- end }}
             {{- end }}
             {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.store }}
@@ -80,39 +82,35 @@ spec:
             runAsUser: 0
       containers:
         - name: hauler-load
-          image: {{ .Values.hauler.image.repository }}:{{ .Values.hauler.image.tag }}
+          image: {{ .Values.haulerJobs.image.repository }}:{{ .Values.haulerJobs.image.tag }}
           imagePullPolicy: {{ .Values.hauler.imagePullPolicy }}
           command: ["/bin/sh", "-c"]
           args:
             - |
-            {{- if and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0) }}
-            {{- range .Values.haulerJobs.remote.artifacts }}
-              hauler store -s /store load /artifacts/{{ .name }} &&
-            {{- end }}
-            {{- end }}
-            {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0) }}
-            {{- range .Values.haulerJobs.local.artifacts }}
-              hauler store -s /store load /artifacts/{{ .name }} &&
-            {{- end }}
-            {{- end }}
-            {{- if and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0) }}
+            {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0)) }}
             {{- range .Values.haulerJobs.remote.manifests }}
-              hauler store -s /store sync --files /manifests/{{ .name }} &&
+              hauler store -s /store sync --filename /manifests/{{ .name }} &&
+            {{- end }}
+            {{- range $index, $manifest := .Values.haulerJobs.local.manifests }}
+              hauler store -s /store sync --filename /manifests/local-manifest-{{ $index }}/{{ $manifest.name }} &&
             {{- end }}
             {{- end }}
-            {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0) }}
-            {{- range .Values.haulerJobs.local.manifests }}
-              hauler store -s /store sync --files /manifests/{{ .name }} &&
+            {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0)) }}
+            {{- range .Values.haulerJobs.remote.artifacts }}
+              hauler store -s /store load --filename /artifacts/{{ .name }} &&
+            {{- end }}
+            {{- range $index, $artifact := .Values.haulerJobs.local.artifacts }}
+              hauler store -s /store load --filename /artifacts/local-artifact-{{ $index }}/{{ $artifact.name }} &&
             {{- end }}
             {{- end }}
               echo hauler load completed &&
               ls -lha /store
           volumeMounts:
-            {{- if and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0) }}
+            {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0)) }}
             - name: artifact-data
               mountPath: /artifacts
             {{- end }}
-            {{- if and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0) }}
+            {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0)) }}
             - name: manifest-data
               mountPath: /manifests
             {{- end }}
@@ -137,10 +135,10 @@ spec:
           emptyDir:
         {{- end }}
         {{- if (and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0)) }}
-        {{- range .Values.haulerJobs.local.artifacts }}
-        - name: local-artifact-{{ .name }}
-          hostPath: 
-            path: {{ .path }}
+        {{- range $index, $artifact := .Values.haulerJobs.local.artifacts }}
+        - name: local-artifact-{{ $index }}
+          hostPath:
+            path: {{ $artifact.path }}
         {{- end }}
         {{- end }}
         {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0)) }}
@@ -148,10 +146,10 @@ spec:
           emptyDir:
         {{- end }}
         {{- if (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0)) }}
-        {{- range .Values.haulerJobs.local.manifests }}
-        - name: local-manifest-{{ .name }}
-          hostPath: 
-            path: {{ .path }}
+        {{- range $index, $manifest := .Values.haulerJobs.local.manifests }}
+        - name: local-manifest-{{ $index }}
+          hostPath:
+            path: {{ $manifest.path }}
         {{- end }}
         {{- end }}
         {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.store }}
