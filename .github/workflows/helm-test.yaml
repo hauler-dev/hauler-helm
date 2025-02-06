@@ -34,7 +34,7 @@ jobs:
       - run: |
           kubectl get nodes
           kubectl get pods -A
-          while ! kubectl get po -n kube-system -l job-name=helm-install-traefik -ojsonpath='{.status.containerStatuses[*].ready}' | grep true
+          while ! kubectl get po -n kube-system -l job-name=helm-install-traefik -ojsonpath='{.items[*].status.conditions[*].reason}' | grep PodCompleted
           do
           sleep 1
           done
