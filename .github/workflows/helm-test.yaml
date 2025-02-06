@@ -59,9 +59,9 @@ jobs:
           echo "Download local-manifest.yaml"
           curl -o /tmp/tests/local-manifest.yaml https://raw.githubusercontent.com/tayterz2/hauler-helm/refs/heads/main/charts/hauler/ci/test-manifest.yaml
           echo "Download hauler binary"
-          curl -sfL https://get.hauler.dev | HAULER_INSTALL_DIR=/usr/local/bin bash
+          curl -sfL https://get.hauler.dev | bash
           echo "Create local store"
-          /usr/local/bin/hauler store -s /tmp/tests/store sync charts/hauler/ci/store-manifest.yaml
+          hauler store -s /tmp/tests/store sync charts/hauler/ci/store-manifest.yaml
 
       - name: Wait for Installs/Loads
         run: |
