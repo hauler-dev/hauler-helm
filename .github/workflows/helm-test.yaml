@@ -16,7 +16,8 @@ jobs:
         with:
           version: v3.14.4
 
-      - uses: actions/setup-python@v5
+      - name: Install Python
+        uses: actions/setup-python@v5
         with:
           python-version: '3.x'
           check-latest: true
@@ -27,46 +28,41 @@ jobs:
       - name: Run chart-testing (lint)
         run: ct lint --target-branch ${{ github.event.repository.default_branch }} --all
 
-      - uses: debianmaster/actions-k3s@master
+      - name: Start k3s
+        uses: debianmaster/actions-k3s@master
         id: k3s
         with:
           version: 'latest'
-      - run: |
-          kubectl get nodes
-          kubectl get pods -A
-          while ! kubectl get po -n kube-system -l job-name=helm-install-traefik -ojsonpath='{.items[*].status.conditions[*].reason}' | grep PodCompleted
+
+      - name: Wait for k3s
+        run: |
+          while ! kubectl get po -n kube-system -l app.kubernetes.io/name=traefik -ojsonpath='{.items[*].status.containerStatuses[*].ready}' | grep true
           do
           sleep 1
           done
-          kubectl get pods -A
-          
-      - name: Create Namespace
-        run: kubectl create namespace helm-test
 
       - name: Run chart-testing (install)
         run: |
-          ct install --target-branch ${{ github.event.repository.default_branch }} --skip-clean-up --namespace helm-test --all --debug --print-config
+          ct install --target-branch ${{ github.event.repository.default_branch }} --skip-clean-up --all --debug --print-config
 
       - name: Get debug output
         run: |
           kubectl apply -f charts/hauler/ci/test-pod.yaml
           kubectl get po -A
           kubectl get svc -A
-          REG_IP=$(kubectl get svc -n helm-test hauler-registry -ojsonpath='{.spec.clusterIP}')
-          FILE_IP=$(kubectl get svc -n helm-test hauler-fileserver -ojsonpath='{.spec.clusterIP}')
-          REG_POD=$(kubectl get po -n helm-test -l app=hauler-registry -ojsonpath='{.items[0].metadata.name}')
-          FILE_POD=$(kubectl get po -n helm-test -l app=hauler-fileserver -ojsonpath='{.items[0].metadata.name}')
-          while ! kubectl get po -n helm-test test-pod -ojsonpath='{.status.containerStatuses[0].ready}' | grep true
+          REG_IP=$(kubectl get svc hauler-registry -ojsonpath='{.spec.clusterIP}')
+          FILE_IP=$(kubectl get svc hauler-fileserver -ojsonpath='{.spec.clusterIP}')
+          REG_POD=$(kubectl get po -l app=hauler-registry -ojsonpath='{.items[0].metadata.name}')
+          FILE_POD=$(kubectl get po -l app=hauler-fileserver -ojsonpath='{.items[0].metadata.name}')
+          while ! kubectl get po test-pod -ojsonpath='{.status.containerStatuses[0].ready}' | grep true
           do
-            echo waiting for test-pod:
-            kubectl get po -n helm-test test-pod -ojsonpath='{.status.containerStatuses[0]}'
             sleep 1
           done
           echo http://$REG_IP:5000/v2/_catalog
-          kubectl exec -qn helm-test test-pod -- curl -s http://$REG_IP:5000/v2/_catalog > /tmp/registry_output.txt
+          kubectl exec -q test-pod -- curl -s http://$REG_IP:5000/v2/_catalog > /tmp/registry_output.txt
           echo registry output:
           cat /tmp/registry_output.txt
           echo http://$FILE_IP:8080/
-          kubectl exec -iqn helm-test test-pod -- curl -s http://$FILE_IP:8080 > /tmp/fileserver_output.txt
+          kubectl exec -q test-pod -- curl -s http://$FILE_IP:8080 > /tmp/fileserver_output.txt
           echo file output:
           cat /tmp/fileserver_output.txt
