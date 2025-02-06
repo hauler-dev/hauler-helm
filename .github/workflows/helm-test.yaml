@@ -34,7 +34,7 @@ jobs:
       - run: |
           kubectl get nodes
           kubectl get pods -A
-          while kubectl get po -n kube-system -ojsonpath='{.item[*].status.containerStatuses[*].ready}' | grep false
+          while ! kubectl get po -n kube-system -l job-name=helm-install-traefik -ojsonpath='{.status.containerStatuses[*].ready}' | grep true
           do
           sleep 1
           done
@@ -63,10 +63,10 @@ jobs:
             sleep 1
           done
           echo http://$REG_IP:5000/v2/_catalog
-          kubectl exec -qn helm-test test-pod -- curl http://$REG_IP:5000/v2/_catalog > /tmp/registry_output.txt
+          kubectl exec -qn helm-test test-pod -- curl -s http://$REG_IP:5000/v2/_catalog > /tmp/registry_output.txt
           echo registry output:
           cat /tmp/registry_output.txt
           echo http://$FILE_IP:8080/
-          kubectl exec -iqn helm-test test-pod -- curl http://$FILE_IP:8080 > /tmp/fileserver_output.txt
+          kubectl exec -iqn helm-test test-pod -- curl -s http://$FILE_IP:8080 > /tmp/fileserver_output.txt
           echo file output:
           cat /tmp/fileserver_output.txt
