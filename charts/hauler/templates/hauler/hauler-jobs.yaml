@@ -80,7 +80,7 @@ spec:
             runAsUser: 0
       containers:
         - name: hauler-load
-          image: {{ .Values.hauler.image.repository }}:{{ .Values.hauler.image.tag }}
+          image: {{ .Values.haulerJobs.image.repository }}:{{ .Values.haulerJobs.image.tag }}
           imagePullPolicy: {{ .Values.hauler.imagePullPolicy }}
           command: ["/bin/sh", "-c"]
           args:
