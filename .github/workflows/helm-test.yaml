@@ -56,9 +56,8 @@ jobs:
           echo "Download local-manifest.yaml"
           curl -o /tmp/tests/local-manifest.yaml https://raw.githubusercontent.com/tayterz2/hauler-helm/refs/heads/main/charts/hauler/ci/test-manifest.yaml
           echo "Download hauler binary"
-          curl -sfL https://get.hauler.dev | bash
+          curl -sfL https://get.hauler.dev | HAULER_VERSION=v1.2.0-rc.1 bash
           echo "Create local store"
-          hauler store -s /tmp/tests/store sync charts/hauler/ci/store-manifest.yaml
           echo "Store built in /tmp/tests/store"
 
       - name: Wait for Installs/Loads
@@ -67,9 +66,9 @@ jobs:
           do
             echo waiting for these to run or complete:
             kubectl get po -A --no-headers | grep -v 'Running\|Completed'
-            kubectl logs -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-fetch || true
+            #kubectl logs -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-fetch || true
             #kubectl get po -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader -o yaml
-            sleep 2
+            sleep 5
           done
 
       - name: Get debug output
