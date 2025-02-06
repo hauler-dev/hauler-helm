@@ -4,7 +4,7 @@
 hauler:
   image:
     repository: hauler/hauler
-    tag: 1.1.1
+    tag: 1.2.0
   imagePullPolicy: Always
 
   initContainers:
@@ -31,7 +31,7 @@ hauler:
 haulerJobs:
   image:
     repository: hauler/hauler-debug
-    tag: 1.1.1
+    tag: 1.2.0
   imagePullPolicy: Always
   # "remote" refers to URL-based hauler artifacts and/or manifests
   remote:
