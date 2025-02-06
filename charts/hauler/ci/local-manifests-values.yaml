@@ -54,7 +54,7 @@ haulerJobs:
       #   name: additional-hauls.tar.zst
     manifests:
       - path: charts/hauler/ci/test-manifest.yaml
-        name: hauler-manifest.yaml
+        name: hauler-manifest
       # - path: /path/to/additional-manifests.yaml
       #   name: additional-manifests.yaml
    # "store" refers to a previously created hauler folder structure.  See the "-s" argument to hauler.  Only one path is acceptable
