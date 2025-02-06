@@ -30,7 +30,7 @@ spec:
               {{- end }}
               {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts }}
               {{- range $index, $artifact := .Values.haulerJobs.local.artifacts }}
-              mkdir -p /tmp/local-artifact-{{ $index }}/
+              mkdir -p /artifacts/local-artifact-{{ $index }}/
               cp -v /tmp/local-artifact-{{ $index }}/{{ $artifact.name }} /artifacts/local-artifact-{{ $index }}/ &&
               {{- end}}
               {{- end}}
