@@ -50,7 +50,8 @@ jobs:
             echo $name - $testvalue
             helm install $name charts/hauler --namespace ${namespace} --values ${testvalue} --create-namespace
           done
-
+      - name: debug
+        run: kubectl get events -Aw    
       - name: Wait for Installs/Loads
         run: |
           while kubectl get po -A --no-headers | grep -v 'Running\|Completed'
