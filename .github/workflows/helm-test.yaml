@@ -29,7 +29,7 @@ jobs:
       #  run: ct lint --target-branch ${{ github.event.repository.default_branch }} --all
 
       - name: Setup k3s
-        run: curl -sfL https://get.k3s.io | sh - ; cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
+        run: curl -sfL https://get.k3s.io | sh - ; sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
 
       - name: Wait for k3s
         run: |
