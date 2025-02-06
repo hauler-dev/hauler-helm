@@ -23,7 +23,7 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
-              find -print /tmp  &&
+              find /tmp -print &&
               {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.store }}
               cp -r /local-store/* /store/   &&
               chown -R 1001:1001 /store &&
