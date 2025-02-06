@@ -92,7 +92,7 @@ spec:
             {{- end }}
             {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0) }}
             {{- range .Values.haulerJobs.local.artifacts }}
-              hauler store -s /store load /artifacts/{{ .name }} &&
+              hauler store -s /store load /artifacts/local-artifact-{{ .name }} &&
             {{- end }}
             {{- end }}
             {{- if and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0) }}
@@ -102,7 +102,7 @@ spec:
             {{- end }}
             {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0) }}
             {{- range .Values.haulerJobs.local.manifests }}
-              hauler store -s /store sync --files /manifests/{{ .name }} &&
+              hauler store -s /store sync --files /manifests/local-manifest-{{ .name }} &&
             {{- end }}
             {{- end }}
               echo hauler load completed &&

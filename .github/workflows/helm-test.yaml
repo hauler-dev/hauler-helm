@@ -63,13 +63,13 @@ jobs:
           echo "Create local store"
           /tmp/hauler/hauler store -s /tmp/tests/store sync charts/hauler/ci/store-manifest.yaml
 
-      - name: debug
-        run: |
-          while true
-          do
-            kubectl logs -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-load -f || true
-            sleep 1
-          done
+      #- name: debug
+      #  run: |
+      #    while true
+      #    do
+      #      kubectl logs -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-load -f || true
+      #      sleep 1
+      #    done
         
       - name: Wait for Installs/Loads
         run: |
