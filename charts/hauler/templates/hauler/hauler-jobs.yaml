@@ -30,7 +30,7 @@ spec:
               {{- end }}
               {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts }}
               {{- range $index, $artifact := .Values.haulerJobs.local.artifacts }}
-              mkdir -p /tmp/local-artifact-{{ $index }}/{{ $artifact.name }}
+              mkdir -p /tmp/local-artifact-{{ $index }}/
               cp -v /tmp/local-artifact-{{ $index }}/{{ $artifact.name }} /artifacts/local-artifact-{{ $index }}/ &&
               {{- end}}
               {{- end}}
@@ -58,7 +58,7 @@ spec:
             {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0) }}
             {{- range $index, $artifact := .Values.haulerJobs.local.artifacts }}
             - name: local-artifact-{{ $index }}
-              mountPath: /tmp/local-artifact-{{ $index }}/{{ $artifact.name }}
+              mountPath: /tmp/local-artifact-{{ $index }}
             {{- end }}
             {{- end }}
             {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0)) }}
