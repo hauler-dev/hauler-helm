@@ -85,6 +85,7 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
+              find /artifacts /manifests
             {{- if and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0) }}
             {{- range .Values.haulerJobs.remote.artifacts }}
               hauler store -s /store load /artifacts/{{ .name }} &&
