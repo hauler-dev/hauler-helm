@@ -41,9 +41,23 @@ jobs:
           sleep 1
           done
 
-      - name: Run chart-testing (install)
+      - name: Install Test Cases
         run: |
-          ct install --target-branch ${{ github.event.repository.default_branch }} --skip-clean-up --all --debug --print-config
+          for test-value in $(ls charts/hauler/ci/*-values.yaml)
+          do
+            name=$(basename ${test}| rev | cut -c13- | rev)
+            echo $name - $test-value
+            helm install $name charts/hauler --namespace hauler-${name} --values ${test} --kubeconfig .kube/config --create-namespace
+          done
+
+      - name: Wait for Installs/Loads
+        run: |
+          while ! kubectl get po -A --no-headers | grep -v 'Running\|Completed'
+          do
+            echo waiting for these to run or complete:
+            kubectl get po -A --no-headers | grep -v 'Running\|Completed'
+            sleep 2
+          done
 
       - name: Get debug output
         run: |
