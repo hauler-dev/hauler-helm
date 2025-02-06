@@ -47,7 +47,7 @@ jobs:
           do
             name=$(basename ${testvalue}| rev | cut -c13- | rev)
             echo $name - $testvalue
-            helm install $name charts/hauler --namespace hauler-${name} --values ${testvalue} --kubeconfig .kube/config --create-namespace
+            helm install $name charts/hauler --namespace hauler-${name} --values ${testvalue} --create-namespace
           done
 
       - name: Wait for Installs/Loads
