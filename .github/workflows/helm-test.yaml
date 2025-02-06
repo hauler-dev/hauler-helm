@@ -1,9 +1,9 @@
-name: Lint and Test Charts
+name: Lint, Install, and Test Charts
 
 on: push
 
 jobs:
-  lint-test:
+  test-hauler-helm:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
@@ -56,7 +56,7 @@ jobs:
           echo "Download local-manifest.yaml"
           curl -o /tmp/tests/local-manifest.yaml https://raw.githubusercontent.com/tayterz2/hauler-helm/refs/heads/main/charts/hauler/ci/test-manifest.yaml
           echo "Download hauler binary"
-          curl -sfL https://get.hauler.dev | HAULER_VERSION=v1.1.1 bash
+          curl -sfL https://get.hauler.dev | HAULER_VERSION=1.2.0-rc.1 bash
           echo "Create local store"
           echo "Store built in /tmp/tests/store"
 
