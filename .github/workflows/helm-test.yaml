@@ -52,7 +52,7 @@ jobs:
 
       - name: Wait for Installs/Loads
         run: |
-          while ! kubectl get po -A --no-headers | grep -v 'Running\|Completed'
+          while kubectl get po -A --no-headers | grep -v 'Running\|Completed'
           do
             echo waiting for these to run or complete:
             kubectl get po -A --no-headers | grep -v 'Running\|Completed'
