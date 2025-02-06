@@ -50,7 +50,7 @@ jobs:
             echo $name - $testvalue
             helm install $name charts/hauler --namespace ${namespace} --values ${testvalue} --create-namespace
           done
-          
+
       - name: Download & Prep "local" Test Files
         run: |
           mkdir -pv /tmp/tests/ /tmp/tests/store
@@ -67,7 +67,7 @@ jobs:
         run: |
           while true
           do
-            kubectl logs -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-loader -f
+            kubectl logs -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-load -c hauler-loader -f
             sleep 1
           done
         
