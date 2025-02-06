@@ -65,10 +65,11 @@ jobs:
 
       - name: debug
         run: |
-          while ! kubectl logs -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-load
+          while kubectl logs -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-load 2>&1 | grep -q "No resources\|Error from server"
           do
             sleep 1
           done
+          kubectl logs -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-load 
         
       - name: Wait for Installs/Loads
         run: |
