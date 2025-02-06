@@ -14,7 +14,7 @@ jobs:
       - name: Set up Helm
         uses: azure/setup-helm@v4.2.0
         with:
-          version: v3.14.4
+          version: v3.16.4
 
       - name: Install Python
         uses: actions/setup-python@v5
@@ -65,7 +65,7 @@ jobs:
 
       - name: debug
         run: |
-          while ! kubectl logs -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-fetch 2>&1 | grep -q "No resources\|Error from server"
+          while ! kubectl logs -n hauler-local-manifests  -c hauler-fetch 2>&1 | grep -q "No resources\|Error from server"
           do
             sleep 1
           done
