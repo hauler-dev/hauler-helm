@@ -8,5 +8,5 @@ metadata:
 spec:
   containers:
     - name: test-container
-      image: busybox
+      image: hauler/hauler-debug:1.1.1
       command: [ "sleep", "3600" ]
