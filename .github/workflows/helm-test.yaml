@@ -65,9 +65,8 @@ jobs:
 
       - name: debug
         run: |
-          while true
+          while ! kubectl logs -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-load
           do
-            kubectl logs -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-load -f || true
             sleep 1
           done
         
