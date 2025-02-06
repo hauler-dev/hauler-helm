@@ -85,7 +85,6 @@ spec:
           command: ["/bin/sh", "-c"]
           args:
             - |
-              find /artifacts /manifests /store &&
             {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0)) }}
             {{- range .Values.haulerJobs.remote.manifests }}
               hauler store -s /store sync --filename /manifests/{{ .name }} &&
