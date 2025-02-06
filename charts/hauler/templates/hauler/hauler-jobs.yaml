@@ -24,6 +24,7 @@ spec:
           args:
             - |
               find /tmp -print &&
+              df -k &&
               {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.store }}
               cp -r /local-store/* /store/   &&
               chown -R 1001:1001 /store &&
