@@ -53,7 +53,7 @@ haulerJobs:
       # - path: /path/to/additional-hauls.tar.zst
       #   name: additional-hauls.tar.zst
     manifests:
-      - path: /home/runner/work/hauler-helm/hauler-helm/charts/hauler/ci/test-manifest.yaml
+      - path: /home/runner/work/hauler-helm/hauler-helm/testdata/local-manifest.yaml
         name: hauler-manifest
       # - path: /path/to/additional-manifests.yaml
       #   name: additional-manifests.yaml
