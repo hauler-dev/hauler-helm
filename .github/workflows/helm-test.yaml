@@ -58,6 +58,7 @@ jobs:
           echo "Download hauler binary"
           curl -sfL https://get.hauler.dev | HAULER_VERSION=1.2.0-rc.1 bash
           echo "Create local store"
+          hauler store -s /tmp/tests/store sync --filename charts/hauler/ci/store-manifest.yaml
           echo "Store built in /tmp/tests/store"
 
       - name: Wait for Installs/Loads
