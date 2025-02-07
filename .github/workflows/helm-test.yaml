@@ -73,8 +73,17 @@ jobs:
           #done
           while kubectl get po -A -lapp=hauler-registry -ojsonpath='{.items[*].status.containerStatuses[*].ready}' | grep -q "false"
           do
+            for testvalue in $(ls charts/hauler/ci/*-values.yaml)
+            do
+              name=$(basename ${testvalue}| rev | cut -c13- | rev)
+              namespace=hauler-${name}
+              echo kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-fetch
+              kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-fetch || true
+              echo kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-load
+              kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-load || true
+            done
             echo "waiting for registries to start"
-            sleep 5
+            sleep 1
           done
           while kubectl get po -A -lapp=hauler-fileserver -ojsonpath='{.items[*].status.containerStatuses[*].ready}' | grep -q "false"
           do
@@ -99,9 +108,13 @@ jobs:
             kubectl exec -q test-pod -- curl -s ${REGISTRY_URL} > /tmp/registry_output.txt
             echo registry output:
             cat /tmp/registry_output.txt
+            echo kubectl -n $namespace logs -lapp=hauler-registry
+            kubectl -n $namespace logs -lapp=hauler-registry || true
             HTTP_URL=http://hauler-fileserver.${namespace}.svc.cluster.local:8080
             echo HTTP_URL = $HTTP_URL
             kubectl exec -q test-pod -- curl -s ${HTTP_URL} > /tmp/fileserver_output.txt
             echo file output:
             cat /tmp/fileserver_output.txt
+            echo kubectl -n $namespace logs -lapp=hauler-fileserver
+            kubectl -n $namespace logs -lapp=hauler-fileserver || true
           done

@@ -50,6 +50,7 @@ spec:
               curl -o /manifests/{{ .name }} {{ .path }} &&
               {{- end }}
               {{- end }}
+              hauler store -s /store list
               echo hauler fetch completed
           volumeMounts:
             {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0)) }}
@@ -104,7 +105,7 @@ spec:
             {{- end }}
             {{- end }}
               echo hauler load completed &&
-              ls -lha /store
+              hauler store -s /store list
           volumeMounts:
             {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0)) }}
             - name: artifact-data
