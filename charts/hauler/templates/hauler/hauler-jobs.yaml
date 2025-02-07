@@ -57,6 +57,7 @@ spec:
               echo hauler store -s /store list &&
               hauler store -s /store list &&
               ls -lha /store /local-store &&
+              hauler version &&
               echo hauler fetch completed
           volumeMounts:
             {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0)) }}
@@ -111,6 +112,7 @@ spec:
             {{- end }}
             {{- end }}
               echo hauler load completed &&
+              hauler version &&
               hauler store -s /store list
           volumeMounts:
             {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0)) }}
