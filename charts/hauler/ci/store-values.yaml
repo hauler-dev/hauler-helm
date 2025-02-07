@@ -58,7 +58,7 @@ haulerJobs:
       # - path: /path/to/additional-manifests.yaml
       #   name: additional-manifests.yaml
    # "store" refers to a previously created hauler folder structure.  See the "-s" argument to hauler.  Only one path is acceptable
-    store: /tmp/tests/store/
+    store: /tmp/tests/store
 
 # Helm Chart Values for the Hauler Fileserver
 # Docs: https://rancherfederal.github.io/hauler-docs/docs/guides-references/command-line/hauler-store#hauler-store-serve-fileserver
