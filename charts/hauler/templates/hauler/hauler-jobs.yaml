@@ -57,7 +57,7 @@ spec:
               echo hauler store -s /store list &&
               hauler store -s /store list &&
               echo hauler fetch completed &&
-              find /local-store /store -ls &&
+              find /local-store /store -ls
           volumeMounts:
             {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0)) }}
             - name: artifact-data
