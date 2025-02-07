@@ -56,25 +56,27 @@ jobs:
           echo "Download local-manifest.yaml"
           curl -o /tmp/tests/local-manifest.yaml https://raw.githubusercontent.com/tayterz2/hauler-helm/refs/heads/main/charts/hauler/ci/test-manifest.yaml
           echo "Download hauler binary"
-          curl -sfL https://get.hauler.dev | HAULER_VERSION=1.2.0-rc.1 bash
+          curl -sfL https://get.hauler.dev | HAULER_VERSION=1.2.0 bash
           echo "Create local store"
           hauler store -s /tmp/tests/store sync --filename charts/hauler/ci/store-manifest.yaml
           echo "Store built in /tmp/tests/store"
+          hauler store -s /tmp/tests/store list
 
       - name: Wait for Installs/Loads
         run: |
-          #while kubectl get po -A --no-headers | grep -v 'Running\|Completed'
-          #do
-          #  echo waiting for these to run or complete:
-          #  kubectl get po -A --no-headers | grep -v 'Running\|Completed'
-          #  kubectl logs -n hauler-store -lapp=hauler-registry -f || true
-          #  #kubectl get po -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader -o yaml
-          #  sleep 5
-          #done
           while kubectl get po -A -lapp=hauler-registry -ojsonpath='{.items[*].status.containerStatuses[*].ready}' | grep -q "false"
           do
+            for testvalue in $(ls charts/hauler/ci/*-values.yaml)
+            do
+              name=$(basename ${testvalue}| rev | cut -c13- | rev)
+              namespace=hauler-${name}
+              echo kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-fetch --tail=50
+              kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-fetch  --tail=50 || echo still waiting for fetch
+              echo kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-load  --tail=50
+              kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-load  --tail=50 || echo still waiting for load
+            done
             echo "waiting for registries to start"
-            sleep 5
+            sleep 1
           done
           while kubectl get po -A -lapp=hauler-fileserver -ojsonpath='{.items[*].status.containerStatuses[*].ready}' | grep -q "false"
           do
@@ -99,9 +101,13 @@ jobs:
             kubectl exec -q test-pod -- curl -s ${REGISTRY_URL} > /tmp/registry_output.txt
             echo registry output:
             cat /tmp/registry_output.txt
+            echo kubectl -n $namespace logs -lapp=hauler-registry
+            kubectl -n $namespace logs -lapp=hauler-registry --tail=50 || true
             HTTP_URL=http://hauler-fileserver.${namespace}.svc.cluster.local:8080
             echo HTTP_URL = $HTTP_URL
             kubectl exec -q test-pod -- curl -s ${HTTP_URL} > /tmp/fileserver_output.txt
             echo file output:
             cat /tmp/fileserver_output.txt
+            echo kubectl -n $namespace logs -lapp=hauler-fileserver
+            kubectl -n $namespace logs -lapp=hauler-fileserver --tail=50 || true
           done

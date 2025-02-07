@@ -24,19 +24,23 @@ spec:
           args:
             - |
               {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.store }}
-              cp -r /local-store/* /store/   &&
-              chown -R 1001:1001 /store &&
+              echo start copy &&
+              cp -av /local-store/* /store/   &&
+              chown -Rv 1001:1001 /store &&
+              hauler store -s /store list &&
+              echo hauler store -s /local-store list &&
+              hauler store -s /local-store list &&
               echo copied {{ .Values.haulerJobs.local.store }} &&
               {{- end }}
               {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts }}
               {{- range $index, $artifact := .Values.haulerJobs.local.artifacts }}
-              mkdir -p /artifacts/local-artifact-{{ $index }}/
+              mkdir -p /artifacts/local-artifact-{{ $index }}/ &&
               cp -v /tmp/local-artifact-{{ $index }}/{{ $artifact.name }} /artifacts/local-artifact-{{ $index }}/ &&
               {{- end}}
               {{- end}}
               {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.manifests }}
               {{- range $index, $manifest := .Values.haulerJobs.local.manifests }}
-              mkdir -p /manifests/local-manifest-{{ $index }}/
+              mkdir -p /manifests/local-manifest-{{ $index }}/ &&
               cp -v /tmp/local-manifest-{{ $index }}/{{ $manifest.name }} /manifests/local-manifest-{{ $index }}/ &&
               {{- end}}
               {{- end}}
@@ -50,6 +54,9 @@ spec:
               curl -o /manifests/{{ .name }} {{ .path }} &&
               {{- end }}
               {{- end }}
+              echo hauler store -s /store list &&
+              hauler store -s /store list &&
+              ls -lha /store /local-store &&
               echo hauler fetch completed
           volumeMounts:
             {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0)) }}
@@ -104,7 +111,7 @@ spec:
             {{- end }}
             {{- end }}
               echo hauler load completed &&
-              ls -lha /store
+              hauler store -s /store list
           volumeMounts:
             {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0)) }}
             - name: artifact-data
