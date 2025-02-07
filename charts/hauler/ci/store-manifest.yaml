@@ -1,5 +1,5 @@
 # v1 manifests
-apiVersion: content.hauler.cattle.io/v1alpha1
+apiVersion: content.hauler.cattle.io/v1
 kind: Images
 metadata:
   name: hauler-content-images-example
@@ -7,7 +7,7 @@ spec:
   images:
     - name: public.ecr.aws/docker/library/redis:7.2.4-alpine
 ---
-apiVersion: content.hauler.cattle.io/v1alpha1
+apiVersion: content.hauler.cattle.io/v1
 kind: Charts
 metadata:
   name: hauler-content-charts-example
@@ -17,7 +17,7 @@ spec:
       repoURL: http://charts.jetstack.io
       version: v1.16.2
 ---
-apiVersion: content.hauler.cattle.io/v1alpha1
+apiVersion: content.hauler.cattle.io/v1
 kind: Files
 metadata:
   name: hauler-content-files-example
