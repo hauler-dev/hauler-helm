@@ -35,7 +35,7 @@ hauler:
     args: ["-c", "sleep infinity"]
 
 # Helm Chart Values for the Hauler Jobs
-# Docs: https://rancherfederal.github.io/hauler-docs/docs/introduction/quickstart
+# Docs: https://docs.hauler.dev/docs/introduction/quickstart
 
 haulerJobs:
   hauls:
@@ -55,7 +55,7 @@ haulerJobs:
       #   name: manifest.yaml
 
 # Helm Chart Values for the Hauler Fileserver
-# Docs: https://rancherfederal.github.io/hauler-docs/docs/guides-references/command-line/hauler-store#hauler-store-serve-fileserver
+# Docs: https://docs.hauler.dev/docs/hauler-usage/store/serve/fileserver
 
 haulerFileserver:
   enabled: true
@@ -83,7 +83,7 @@ haulerFileserver:
       targetPort: 8080 # default port for the fileserver
 
 # Helm Chart Values for the Hauler Registry
-# Docs: https://rancherfederal.github.io/hauler-docs/docs/guides-references/command-line/hauler-store#hauler-store-serve-registry
+# Docs: https://docs.hauler.dev/docs/hauler-usage/store/serve/registry
 
 haulerRegistry:
   enabled: true
