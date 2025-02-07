@@ -73,14 +73,14 @@ jobs:
           #done
           while kubectl get po -A -lapp=hauler-registry -ojsonpath='{.items[*].status.containerStatuses[*].ready}' | grep -q "false"
           do
-            for testvalue in $(ls charts/hauler/ci/*-values.yaml | grep store)
+            for testvalue in $(ls charts/hauler/ci/store-values.yaml)
             do
               name=$(basename ${testvalue}| rev | cut -c13- | rev)
               namespace=hauler-${name}
               echo kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-fetch
-              kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-fetch || true
+              kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-fetch || echo still waiting for fetch
               echo kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-load
-              kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-load || true
+              kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-load || echo still waiting for load
             done
             echo "waiting for registries to start"
             sleep 1
