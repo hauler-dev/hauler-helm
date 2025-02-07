@@ -1,0 +1,54 @@
+{{- if .Values.hauler.debug.enabled }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: hauler-debug
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app.kubernetes.io/name: hauler-debug
+    app.kubernetes.io/instance: {{ .Release.Name }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: hauler-debug
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: hauler-debug
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: hauler-debug
+          image: {{ .Values.hauler.debug.image.repository }}:{{ .Values.hauler.debug.image.tag }}
+          imagePullPolicy: {{ .Values.hauler.debug.imagePullPolicy }}
+          command: {{ .Values.hauler.debug.command }}
+          args: {{ .Values.hauler.debug.args }}
+          volumeMounts:
+            - name: hauler-data
+              mountPath: /store
+            - name: hauler-hauls
+              mountPath: /hauls
+            - name: hauler-manifests
+              mountPath: /manifests
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
+      restartPolicy: Always
+      volumes:
+        - name: hauler-data
+          persistentVolumeClaim:
+            claimName: hauler-data
+        - name: hauler-hauls
+          persistentVolumeClaim:
+            claimName: hauler-hauls
+        - name: hauler-manifests
+          persistentVolumeClaim:
+            claimName: hauler-manifests
+{{- end }}
