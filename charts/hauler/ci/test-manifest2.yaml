@@ -1,0 +1,26 @@
+# v1 manifests
+apiVersion: content.hauler.cattle.io/v1
+kind: Images
+metadata:
+  name: hauler-content-images-example
+spec:
+  images:
+    - name: ghcr.io/hauler-dev/hauler-debug:1.2.1
+---
+apiVersion: content.hauler.cattle.io/v1
+kind: Charts
+metadata:
+  name: hauler-content-charts-example
+spec:
+  charts:
+    - name: hauler-helm
+      repoURL: oci://ghcr.io/hauler-dev
+---
+apiVersion: content.hauler.cattle.io/v1
+kind: Files
+metadata:
+  name: hauler-content-files-example
+spec:
+  files:
+    - path: https://get.rke2.io
+      name: install.sh

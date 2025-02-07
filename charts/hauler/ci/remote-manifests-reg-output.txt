@@ -1,0 +1,1 @@
+{"repositories":["distroless/base","hauler/hauler-helm","hauler/install.sh","hauler/rancher","library/busybox"]}
