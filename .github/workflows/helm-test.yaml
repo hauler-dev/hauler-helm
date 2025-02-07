@@ -73,7 +73,7 @@ jobs:
           #done
           while kubectl get po -A -lapp=hauler-registry -ojsonpath='{.items[*].status.containerStatuses[*].ready}' | grep -q "false"
           do
-            for testvalue in $(ls charts/hauler/ci/*-values.yaml)
+            for testvalue in $(ls charts/hauler/ci/*-values.yaml | grep store)
             do
               name=$(basename ${testvalue}| rev | cut -c13- | rev)
               namespace=hauler-${name}
