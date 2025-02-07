@@ -63,17 +63,9 @@ jobs:
 
       - name: Wait for Installs/Loads
         run: |
-          #while kubectl get po -A --no-headers | grep -v 'Running\|Completed'
-          #do
-          #  echo waiting for these to run or complete:
-          #  kubectl get po -A --no-headers | grep -v 'Running\|Completed'
-          #  kubectl logs -n hauler-store -lapp=hauler-registry -f || true
-          #  #kubectl get po -n hauler-local-manifests -lbatch.kubernetes.io/job-name=hauler-loader -o yaml
-          #  sleep 5
-          #done
           while kubectl get po -A -lapp=hauler-registry -ojsonpath='{.items[*].status.containerStatuses[*].ready}' | grep -q "false"
           do
-            for testvalue in $(ls charts/hauler/ci/store-values.yaml)
+            for testvalue in $(ls charts/hauler/ci/*-values.yaml)
             do
               name=$(basename ${testvalue}| rev | cut -c13- | rev)
               namespace=hauler-${name}
