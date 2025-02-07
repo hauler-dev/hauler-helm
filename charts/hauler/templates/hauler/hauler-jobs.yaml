@@ -24,8 +24,14 @@ spec:
           args:
             - |
               {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.store }}
+              find /local-store /store -ls
+              echo start copy
               cp -av /local-store/* /store/   &&
               chown -Rv 1001:1001 /store &&
+              echo hauler store -s /store list
+              hauler store -s /store list
+              echo hauler store -s /local-store list
+              hauler store -s /local-store list
               echo copied {{ .Values.haulerJobs.local.store }} &&
               {{- end }}
               {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts }}
