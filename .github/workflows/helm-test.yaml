@@ -70,10 +70,10 @@ jobs:
             do
               name=$(basename ${testvalue}| rev | cut -c13- | rev)
               namespace=hauler-${name}
-              echo kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-fetch --tail=50
+              echo kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-fetch --tail=100
               kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-fetch  --tail=50 || echo still waiting for fetch
               echo kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-load  --tail=50
-              kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-load  --tail=50 || echo still waiting for load
+              kubectl logs -n $namespace -lbatch.kubernetes.io/job-name=hauler-loader -c hauler-load  --tail=100 || echo still waiting for load
             done
             echo "waiting for registries to start"
             sleep 1
@@ -102,12 +102,12 @@ jobs:
             echo registry output:
             cat /tmp/registry_output.txt
             echo kubectl -n $namespace logs -lapp=hauler-registry
-            kubectl -n $namespace logs -lapp=hauler-registry --tail=50 || true
+            kubectl -n $namespace logs -lapp=hauler-registry --tail=100 || true
             HTTP_URL=http://hauler-fileserver.${namespace}.svc.cluster.local:8080
             echo HTTP_URL = $HTTP_URL
             kubectl exec -q test-pod -- curl -s ${HTTP_URL} > /tmp/fileserver_output.txt
             echo file output:
             cat /tmp/fileserver_output.txt
             echo kubectl -n $namespace logs -lapp=hauler-fileserver
-            kubectl -n $namespace logs -lapp=hauler-fileserver --tail=50 || true
+            kubectl -n $namespace logs -lapp=hauler-fileserver --tail=100 || true
           done
