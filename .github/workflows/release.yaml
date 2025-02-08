@@ -3,7 +3,7 @@ name: Release Workflow
 on:
   push:
     branches:
-      - maindisable
+      - main
 
 jobs:
   chart-release:
