@@ -93,13 +93,13 @@ jobs:
             kubectl exec -q test-pod -- curl -s ${REGISTRY_URL} > /tmp/${name}-reg-output.txt
             HTTP_URL=http://hauler-fileserver.${namespace}.svc.cluster.local:8080
             kubectl exec -q test-pod -- curl -s ${HTTP_URL} > /tmp/${name}-web-output.txt
-            if diff -q charts/hauler/ci/${name}-web-output.txt /tmp/${name}-web-output.txt
+            if diff -u charts/hauler/ci/${name}-web-output.txt /tmp/${name}-web-output.txt
             then
               successes="${successes} ${name}-web"
             else
               failures="${failures} ${name}-web"
             fi
-            if diff -q charts/hauler/ci/${name}-reg-output.txt /tmp/${name}-reg-output.txt
+            if diff -u charts/hauler/ci/${name}-reg-output.txt /tmp/${name}-reg-output.txt
             then
               successes="${successes} ${name}-reg"
             else
