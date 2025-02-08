@@ -9,7 +9,7 @@ hauler:
 
   image:
     repository: hauler/hauler
-    tag: 1.2.0
+    tag: 1.2.1
   imagePullPolicy: Always
 
   initContainers:
@@ -26,12 +26,17 @@ hauler:
       storageRequest: 48Gi  # recommended size of 3x the artifact(s)
     test: false             # set to "true" for CI/test builds where there's no storage available
 
+  debug:
+    enabled: true
+    image:
+      repository: hauler/hauler-debug
+      tag: 1.2.1
+    imagePullPolicy: Always
+    command: ["/bin/sh"]
+    args: ["-c", "sleep infinity"]
+
 # Helm Chart Values for the Hauler Jobs
-# Docs: https://rancherfederal.github.io/hauler-docs/docs/introduction/quickstart
-# Hauler Jobs are used to populate the Registry and/or Filestore with content
-# Use "local" in order to populate the hauler store with locally available stores, artifacts, and/or manifests.
-# Use "remote" if these are remotely (HTTP/S/FTP/etc) available instead
-# Simply comment out any unneeded values
+# Docs: https://docs.hauler.dev/docs/introduction/quickstart
 
 haulerJobs:
   image:
@@ -42,32 +47,31 @@ haulerJobs:
   remote:
     artifacts:
       # - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/haul.tar.zst
-      #  name: remhaul.tar.zst
+      #   name: remhaul.tar.zst
       # - path: /path/to/additional-hauls.tar.zst
       #   name: additional-hauls.tar.zst
     manifests:
       # - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/hauler-manifest.yaml
-      #  name: remhauler-manifest.yaml
+      #   name: remhauler-manifest.yaml
       # - path: /path/to/additional-manifests.yaml
       #   name: additional-manifests.yaml
-  # "local" refers to the host the container/kubectl is being run on.  Use filesystem paths (hostDir) for these values.
+  # "local" refers to the host the container/kubectl is being run on.  Use filesystem paths and filenames for these values.
   local:
     artifacts:
-      # - path: /usr/local/testdata/haul.tar.zst
-      #  name: local-haul
-      # - path: /path/to/additional-hauls.tar.zst
-      #   name: additional-hauls
+      # - path: /usr/local/testdata/
+      #   name: haul.tar.zst
+      # - path: /path/to/
+      #   name: additional-hauls.tar.zst
     manifests:
-      # - path: /usr/local/testdata/hauler-manifest.yaml
-      #  name: local-manifest
-      # - path: /path/to/additional-manifests.yaml
-      #   name: additional-manifests
+      # - path: /usr/local/testdata/
+      #   name: hauler-manifest.yaml
+      # - path: /path/to/
+      #   name: additional-manifests.yaml
    # "store" refers to a previously created hauler folder structure.  See the "-s" argument to hauler.  Only one path is acceptable
    # store: /my/previously/created/hauler/store/dir/
 
 # Helm Chart Values for the Hauler Fileserver
-# Docs: https://rancherfederal.github.io/hauler-docs/docs/guides-references/command-line/hauler-store#hauler-store-serve-fileserver
-#
+# Docs: https://docs.hauler.dev/docs/hauler-usage/store/serve/fileserver
 
 haulerFileserver:
   enabled: false
@@ -95,7 +99,7 @@ haulerFileserver:
       targetPort: 8080  # default port for the fileserver
 
 # Helm Chart Values for the Hauler Registry
-# Docs: https://rancherfederal.github.io/hauler-docs/docs/guides-references/command-line/hauler-store#hauler-store-serve-registry
+# Docs: https://docs.hauler.dev/docs/hauler-usage/store/serve/registry
 
 haulerRegistry:
   enabled: false
