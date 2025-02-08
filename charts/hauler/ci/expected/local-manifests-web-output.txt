@@ -3,5 +3,4 @@
 <pre>
 <a href="hauler-helm-1.2.1.tgz">hauler-helm-1.2.1.tgz</a>
 <a href="install.sh">install.sh</a>
-<a href="rancher-2.8.5.tgz">rancher-2.8.5.tgz</a>
 </pre>
