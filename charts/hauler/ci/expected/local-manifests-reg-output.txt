@@ -1,0 +1,1 @@
+{"repositories":["hauler/hauler-helm","hauler/install.sh","hauler-dev/hauler-debug"]}
