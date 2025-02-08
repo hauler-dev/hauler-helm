@@ -1,5 +1,7 @@
 # Hauler Helm Chart
 
+---
+
 | Type        | Chart Version | App Version |
 | ----------- | ------------- | ----------- |
 | application | `1.2.1`       | `1.2.1`     |
