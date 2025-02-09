@@ -2,14 +2,9 @@
 # Docs: https://hauler.dev
 
 hauler:
-  # labels:
-  #   key: value
-  # annotations:
-  #   key: value
-
   image:
     repository: hauler/hauler
-    tag: 1.2.1
+    tag: 1.2.0
   imagePullPolicy: Always
 
   initContainers:
@@ -21,22 +16,17 @@ hauler:
 
   data:
     pvc:
-      accessModes: ReadWriteMany
+      accessModes: ReadWriteOnce
       # storageClass: longhorn # optional... will use default storage class
-      storageRequest: 48Gi  # recommended size of 3x the artifact(s)
-    test: false             # set to "true" for CI/test builds where there's no storage available
-
-  debug:
-    enabled: true
-    image:
-      repository: hauler/hauler-debug
-      tag: 1.2.1
-    imagePullPolicy: Always
-    command: ["/bin/sh"]
-    args: ["-c", "sleep infinity"]
+      storageRequest: 5Gi  # recommended size of 3x the artifact(s)
+      test: true
 
 # Helm Chart Values for the Hauler Jobs
-# Docs: https://docs.hauler.dev/docs/introduction/quickstart
+# Docs: https://rancherfederal.github.io/hauler-docs/docs/introduction/quickstart
+# Hauler Jobs are used to populate the Registry and/or Filestore with content
+# Use "local" in order to populate the hauler store with locally available stores, artifacts, and/or manifests.
+# Use "remote" if these are remotely (HTTP/S/FTP/etc) available instead
+# Simply comment out any unneeded values
 
 haulerJobs:
   image:
@@ -51,42 +41,39 @@ haulerJobs:
       # - path: /path/to/additional-hauls.tar.zst
       #   name: additional-hauls.tar.zst
     manifests:
-      # - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/hauler-manifest.yaml
-      #   name: remhauler-manifest.yaml
+      - path: https://raw.githubusercontent.com/tayterz2/hauler-helm/refs/heads/main/charts/hauler/ci/test-manifest.yaml
+        name: remhauler-manifest.yaml
       # - path: /path/to/additional-manifests.yaml
       #   name: additional-manifests.yaml
-  # "local" refers to the host the container/kubectl is being run on.  Use filesystem paths and filenames for these values.
+  # "local" refers to the host the container/kubectl is being run on.  Use filesystem paths (hostDir) for these values.
   local:
     artifacts:
-      # - path: /usr/local/testdata/
-      #   name: haul.tar.zst
-      # - path: /path/to/
+      # - path: /usr/local/testdata/haul.tar.zst
+      #  name: haul.tar.zst
+      # - path: /path/to/additional-hauls.tar.zst
       #   name: additional-hauls.tar.zst
     manifests:
-      # - path: /usr/local/testdata/
-      #   name: hauler-manifest.yaml
-      # - path: /path/to/
+      # - path: /usr/local/testdata/hauler-manifest.yaml
+      #  name: hauler-manifest.yaml
+      # - path: /path/to/additional-manifests.yaml
       #   name: additional-manifests.yaml
    # "store" refers to a previously created hauler folder structure.  See the "-s" argument to hauler.  Only one path is acceptable
    # store: /my/previously/created/hauler/store/dir/
 
 # Helm Chart Values for the Hauler Fileserver
-# Docs: https://docs.hauler.dev/docs/hauler-usage/store/serve/fileserver
+# Docs: https://rancherfederal.github.io/hauler-docs/docs/guides-references/command-line/hauler-store#hauler-store-serve-fileserver
+#
 
 haulerFileserver:
-  enabled: false
+  enabled: true
   port: 8080  # default port for the fileserver
   replicas: 1
 
   ingress:
     enabled: true
-    # labels:
-    #   key: value
-    # annotations:
-    #   key: value
     hostname: fileserver.ranchers.io
     tls:
-      enabled: false
+      enabled: true
       source: secret         # only supported source
       secretName: tls-certs  # must be created outside of this chart
 
@@ -99,24 +86,20 @@ haulerFileserver:
       targetPort: 8080  # default port for the fileserver
 
 # Helm Chart Values for the Hauler Registry
-# Docs: https://docs.hauler.dev/docs/hauler-usage/store/serve/registry
+# Docs: https://rancherfederal.github.io/hauler-docs/docs/guides-references/command-line/hauler-store#hauler-store-serve-registry
 
 haulerRegistry:
-  enabled: false
+  enabled: true
   port: 5000      # default port for the registry
   replicas: 1
 
   ingress:
     enabled: true
-    # labels:
-    #   key: value
-    # annotations:
-    #   key: value
     hostname: registry.ranchers.io
     tls:
-      enabled: false
-      source: secret         # only supported source
-      secretName: tls-certs  # must be created outside of this chart
+      enabled: true
+      source: secret          # only supported source
+      secretName: tls-certs   # must be created outside of this chart
 
   service:
     enabled: true
