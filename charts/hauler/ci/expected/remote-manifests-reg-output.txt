@@ -1,1 +1,0 @@
-{"repositories":["hauler/install.sh","hauler/rancher"]}
