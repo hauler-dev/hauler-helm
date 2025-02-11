@@ -16,6 +16,7 @@ metadata:
 spec:
   template:
     spec:
+      {{- if or (and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0)) }}
       initContainers:
         - name: hauler-fetch
           image: {{ .Values.haulerJobs.image.repository }}:{{ .Values.haulerJobs.image.tag }}
@@ -39,16 +40,6 @@ spec:
               cp -v /tmp/local-manifest-{{ $index }}/{{ $manifest.name }} /manifests/local-manifest-{{ $index }}/ &&
               {{- end}}
               {{- end}}
-              {{- if and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts }}
-              {{- range .Values.haulerJobs.remote.artifacts }}
-              curl -o /artifacts/{{ .name }} {{ .path }} &&
-              {{- end }}
-              {{- end }}
-              {{- if and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests }}
-              {{- range .Values.haulerJobs.remote.manifests }}
-              curl -o /manifests/{{ .name }} {{ .path }} &&
-              {{- end }}
-              {{- end }}
               echo hauler fetch completed
           volumeMounts:
             {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0)) }}
@@ -79,6 +70,7 @@ spec:
               mountPath: /store
           securityContext:
             runAsUser: 0
+      {{- end }}
       containers:
         - name: hauler-load
           image: {{ .Values.haulerJobs.image.repository }}:{{ .Values.haulerJobs.image.tag }}
@@ -88,7 +80,7 @@ spec:
             - |
             {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0)) }}
             {{- range .Values.haulerJobs.remote.manifests }}
-              hauler store -s /store sync --filename /manifests/{{ .name }} &&
+              hauler store -s /store sync --filename /manifests/{{ .path }} &&
             {{- end }}
             {{- range $index, $manifest := .Values.haulerJobs.local.manifests }}
               hauler store -s /store sync --filename /manifests/local-manifest-{{ $index }}/{{ $manifest.name }} &&
@@ -96,7 +88,7 @@ spec:
             {{- end }}
             {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.artifacts (gt (len .Values.haulerJobs.remote.artifacts) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0)) }}
             {{- range .Values.haulerJobs.remote.artifacts }}
-              hauler store -s /store load --filename /artifacts/{{ .name }} &&
+              hauler store -s /store load --filename /artifacts/{{ .path }} &&
             {{- end }}
             {{- range $index, $artifact := .Values.haulerJobs.local.artifacts }}
               hauler store -s /store load --filename /artifacts/local-artifact-{{ $index }}/{{ $artifact.name }} &&
