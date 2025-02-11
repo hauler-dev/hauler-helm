@@ -16,7 +16,7 @@ metadata:
 spec:
   template:
     spec:
--     {{- if or (and .Values.haulerJobs.local .Values.haulerJobs.local.store) (and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0)) }}
+      {{- if or (and .Values.haulerJobs.local .Values.haulerJobs.local.store) (and .Values.haulerJobs.local .Values.haulerJobs.local.artifacts (gt (len .Values.haulerJobs.local.artifacts) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0)) }}
       initContainers:
         - name: hauler-fetch
           image: {{ .Values.haulerJobs.image.repository }}:{{ .Values.haulerJobs.image.tag }}
