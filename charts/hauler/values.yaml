@@ -24,7 +24,6 @@ hauler:
       accessModes: ReadWriteMany
       # storageClass: longhorn # optional... will use default storage class
       storageRequest: 48Gi  # recommended size of 3x the artifact(s)
-    test: false             # set to "true" for testing builds with no storage available
 
   debug:
     enabled: true
