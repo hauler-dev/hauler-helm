@@ -80,22 +80,22 @@ spec:
             - |
             {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0)) }}
             {{- range .Values.haulerJobs.remote.manifests }}
-              hauler store sync --filename {{ .path }} &&
+              hauler store --store /store sync --filename {{ .path }} &&
             {{- end }}
             {{- range $index, $manifest := .Values.haulerJobs.local.manifests }}
-              hauler store sync --filename /manifests/local-manifest-{{ $index }}/{{ $manifest.name }} &&
+              hauler store --store /store sync --filename /manifests/local-manifest-{{ $index }}/{{ $manifest.name }} &&
             {{- end }}
             {{- end }}
             {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.hauls (gt (len .Values.haulerJobs.remote.hauls) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.hauls (gt (len .Values.haulerJobs.local.hauls) 0)) }}
             {{- range .Values.haulerJobs.remote.hauls }}
-              hauler store load --filename /hauls/{{ .name }} &&
+              hauler store --store /store load --filename /hauls/{{ .name }} &&
             {{- end }}
             {{- range $index, $haul := .Values.haulerJobs.local.hauls }}
-              hauler store load --filename /hauls/local-haul-{{ $index }}/{{ $haul.name }} &&
+              hauler store --store /store load --filename /hauls/local-haul-{{ $index }}/{{ $haul.name }} &&
             {{- end }}
             {{- end }}
               echo hauler load completed &&
-              hauler store info
+              hauler store --store /store info
           volumeMounts:
             {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.hauls (gt (len .Values.haulerJobs.remote.hauls) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.hauls (gt (len .Values.haulerJobs.local.hauls) 0)) }}
             - name: haul-data
