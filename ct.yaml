@@ -1,0 +1,4 @@
+# Chart Testing ("ct") Configuration
+chart-dirs:
+  - charts
+validate-maintainers: false
