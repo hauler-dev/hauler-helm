@@ -15,7 +15,7 @@ hauler:
   initContainers:
     image:
       repository: rancher/kubectl
-      tag: v1.31.3 # update to your kubernetes version
+      tag: v1.31.3  # update to your kubernetes version
     imagePullPolicy: Always
     timeout: 1h
 
@@ -42,7 +42,7 @@ haulerJobs:
     repository: hauler/hauler-debug
     tag: 1.2.0
   imagePullPolicy: Always
-  remote: # remote refers to hauls/manifests accessible via URLs
+  remote:   # remote refers to hauls/manifests accessible via URLs
     hauls:
       # - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/haul.tar.zst
       #   name: remhaul.tar.zst
@@ -53,7 +53,7 @@ haulerJobs:
       #   name: remhauler-manifest.yaml
       # - path: https://path/to/additional-manifests.yaml
       #   name: additional-manifests.yaml
-  local: # local refers to hauls/manifests accessible via the local filesystem/filepaths/filenames
+  local:  # local refers to hauls/manifests accessible via the local filesystem/filepaths/filenames
     hauls:
       # - path: /usr/local/testdata/
       #   name: haul.tar.zst
@@ -66,7 +66,7 @@ haulerJobs:
       #   name: additional-manifests.yaml
   # store refers to a previously created hauler store directory and structure
   # only the filepath is acceptable argument
-  store: # /path/to/previously/created/hauler/store/directory/
+  store:  # /path/to/previously/created/hauler/store/directory/
 
 # Helm Chart Values for the Hauler Fileserver
 # Docs: https://docs.hauler.dev/docs/hauler-usage/store/serve/fileserver
