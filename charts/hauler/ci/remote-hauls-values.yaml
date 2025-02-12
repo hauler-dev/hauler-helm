@@ -41,7 +41,7 @@ haulerJobs:
       # - path: /path/to/additional-hauls.tar.zst
       #   name: additional-hauls.tar.zst
     manifests:
-      # - path: https://raw.githubusercontent.com/tayterz2/hauler-helm/refs/heads/main/charts/hauler/ci/test-manifest.yaml
+      # - path: https://raw.githubusercontent.com/hauler-dev/hauler-helm/main/charts/hauler/ci/test-manifest.yaml
       #   name: remhauler-manifest.yaml
       # - path: /path/to/additional-manifests.yaml
       #   name: additional-manifests.yaml

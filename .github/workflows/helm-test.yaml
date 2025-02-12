@@ -54,7 +54,7 @@ jobs:
           echo "Download local-haul.tar.zst"
           curl -o /tmp/tests/local-haul.tar.zst https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/haul.tar.zst
           echo "Download local-manifest.yaml"
-          curl -o /tmp/tests/local-manifest.yaml https://raw.githubusercontent.com/tayterz2/hauler-helm/refs/heads/main/charts/hauler/ci/test-manifest2.yaml
+          curl -o /tmp/tests/local-manifest.yaml https://raw.githubusercontent.com/hauler-dev/hauler-helm/main/charts/hauler/ci/test-manifest2.yaml
           echo "Download hauler binary"
           curl -sfL https://get.hauler.dev | HAULER_VERSION=1.2.0 bash
           echo "Create local store"
