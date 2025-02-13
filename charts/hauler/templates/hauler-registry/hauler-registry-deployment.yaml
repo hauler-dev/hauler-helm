@@ -58,6 +58,21 @@ spec:
             runAsUser: 1001
             seccompProfile:
               type: RuntimeDefault
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.haulerRegistry.port }}
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.haulerRegistry.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            failureThreshold: 5
+
       restartPolicy: Always
       serviceAccountName: hauler-service-account
       volumes:
