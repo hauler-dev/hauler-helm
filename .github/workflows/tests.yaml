@@ -1,34 +1,36 @@
-name: Lint, Install, and Test Charts
+name: Lint and Test Workflow
 
-on: push
+on:
+  workflow_dispatch:
+  push:
 
 jobs:
   test-hauler-helm:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout
-        uses: actions/checkout@v3
+      - name: Checkout Repository
+        uses: actions/checkout@v4.2.2
         with:
           fetch-depth: 0
 
-      - name: Set up Helm
+      - name: Set Up Helm
         uses: azure/setup-helm@v4.2.0
         with:
-          version: v3.16.4
+          version: v3.17.1
 
-      - name: Install Python
-        uses: actions/setup-python@v5
+      - name: Set Up Python
+        uses: actions/setup-python@v5.4.0
         with:
           python-version: '3.x'
           check-latest: true
 
-      - name: Set up chart-testing
-        uses: helm/chart-testing-action@v2.6.1
+      - name: Set Up Helm Chart Testing
+        uses: helm/chart-testing-action@v2.7.0
 
-      - name: Run chart-testing (lint)
+      - name: Run Chart Testing
         run: ct lint --target-branch ${{ github.event.repository.default_branch }} --all --config ct.yaml
 
-      - name: Setup k3s
+      - name: Set Up k3s
         run: curl -sfL https://get.k3s.io | sh - ; mkdir ~/.kube ; sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config ; sudo chown runner ~/.kube/config
 
       - name: Wait for k3s
@@ -48,7 +50,7 @@ jobs:
             helm install $name charts/hauler --namespace ${namespace} --values ${testvalue} --create-namespace
           done
 
-      - name: Download & Prep "local" Test Files
+      - name: Fetch and Prepare Test Files
         run: |
           mkdir -pv /tmp/tests/store
           echo "Download local-haul.tar.zst"
@@ -61,7 +63,7 @@ jobs:
           hauler store -s /tmp/tests/store load --filename /tmp/tests/local-haul.tar.zst
           echo "Store built in /tmp/tests/store"
 
-      - name: Wait for Installs/Loads and Tester Pod
+      - name: Wait for Resources
         run: |
           COUNTER=0
           MAXWAIT=36  # This is roughly 3 minutes of not working
@@ -122,7 +124,7 @@ jobs:
               failures="${failures} ${name}-reg"
             fi
           done
-          
+
           if ! [ -z "$failures" ]
           then
             echo there were failures, investigate these tests: $failures
