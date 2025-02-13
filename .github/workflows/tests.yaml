@@ -1,0 +1,134 @@
+name: Lint and Test Workflow
+
+on:
+  workflow_dispatch:
+  push:
+
+jobs:
+  test-hauler-helm:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4.2.2
+        with:
+          fetch-depth: 0
+
+      - name: Set Up Helm
+        uses: azure/setup-helm@v4.2.0
+        with:
+          version: v3.17.1
+
+      - name: Set Up Python
+        uses: actions/setup-python@v5.4.0
+        with:
+          python-version: '3.x'
+          check-latest: true
+
+      - name: Set Up Helm Chart Testing
+        uses: helm/chart-testing-action@v2.7.0
+
+      - name: Run Chart Testing
+        run: ct lint --target-branch ${{ github.event.repository.default_branch }} --all --config ct.yaml
+
+      - name: Set Up k3s
+        run: curl -sfL https://get.k3s.io | sh - ; mkdir ~/.kube ; sudo cp /etc/rancher/k3s/k3s.yaml ~/.kube/config ; sudo chown runner ~/.kube/config
+
+      - name: Wait for k3s
+        run: |
+          while ! kubectl get po -n kube-system -l app.kubernetes.io/name=traefik -ojsonpath='{.items[*].status.containerStatuses[*].ready}' | grep -q true
+          do
+          sleep 1
+          done
+
+      - name: Install Test Cases
+        run: |
+          for testvalue in $(ls charts/hauler/ci/*-values.yaml)
+          do
+            name=$(basename ${testvalue}| rev | cut -c13- | rev)
+            namespace=hauler-${name}
+            echo $name - $testvalue
+            helm install $name charts/hauler --namespace ${namespace} --values ${testvalue} --create-namespace
+          done
+
+      - name: Fetch and Prepare Test Files
+        run: |
+          mkdir -pv /tmp/tests/store
+          echo "Download local-haul.tar.zst"
+          curl -o /tmp/tests/local-haul.tar.zst https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/haul.tar.zst
+          echo "Download local-manifest.yaml"
+          curl -o /tmp/tests/local-manifest.yaml https://raw.githubusercontent.com/hauler-dev/hauler-helm/main/charts/hauler/ci/test-manifest2.yaml
+          echo "Download hauler binary"
+          curl -sfL https://get.hauler.dev | HAULER_VERSION=1.2.0 bash
+          echo "Create local store"
+          hauler store -s /tmp/tests/store load --filename /tmp/tests/local-haul.tar.zst
+          echo "Store built in /tmp/tests/store"
+
+      - name: Wait for Resources
+        run: |
+          COUNTER=0
+          MAXWAIT=36  # This is roughly 3 minutes of not working
+          echo -n "waiting for registries to start"
+          while kubectl get po -A -lapp=hauler-registry -ojsonpath='{.items[*].status.containerStatuses[*].ready}' | grep -q "false"
+          do
+            echo -n . ; sleep 5
+            COUNTER=$((COUNTER+1))
+            if [ $COUNTER -gt $MAXWAIT ]
+            then
+              echo
+              echo COUNTER = $COUNTER, registries failed to start
+              exit 1
+            fi
+          done
+          echo
+          echo -n "waiting for fileservers to start"
+          while kubectl get po -A -lapp=hauler-fileserver -ojsonpath='{.items[*].status.containerStatuses[*].ready}' | grep -q "false"
+          do
+            echo -n . ; sleep 1
+            COUNTER=$((COUNTER+1))
+            if [ $COUNTER -gt $MAXWAIT ]
+            then
+              echo
+              echo COUNTER = $COUNTER, fileservers failed to start
+              exit 1
+            fi
+          done
+          echo
+          kubectl apply -f charts/hauler/ci/test-pod.yaml
+          while ! kubectl get po test-pod -ojsonpath='{.status.containerStatuses[0].ready}' | grep true
+          do
+            sleep 1
+          done
+
+      - name: Gather Test Results and Compare
+        run: |
+          successes=""
+          failures=""
+          for testvalue in $(ls charts/hauler/ci/*-values.yaml)
+          do
+            name=$(basename ${testvalue}| rev | cut -c13- | rev)
+            namespace=hauler-${name}
+            REGISTRY_URL=http://hauler-registry.${namespace}.svc.cluster.local:5000/v2/_catalog
+            kubectl exec -q test-pod -- curl -s ${REGISTRY_URL} > /tmp/${name}-reg-output.txt
+            HTTP_URL=http://hauler-fileserver.${namespace}.svc.cluster.local:8080
+            kubectl exec -q test-pod -- curl -s ${HTTP_URL} > /tmp/${name}-web-output.txt
+            if diff -q charts/hauler/ci/expected/${name}-web-output.txt /tmp/${name}-web-output.txt
+            then
+              successes="${successes} ${name}-web"
+            else
+              failures="${failures} ${name}-web"
+            fi
+            if diff -q charts/hauler/ci/expected/${name}-reg-output.txt /tmp/${name}-reg-output.txt
+            then
+              successes="${successes} ${name}-reg"
+            else
+              failures="${failures} ${name}-reg"
+            fi
+          done
+
+          if ! [ -z "$failures" ]
+          then
+            echo there were failures, investigate these tests: $failures
+            exit 1
+          else
+            echo all tests passed: $successes
+          fi

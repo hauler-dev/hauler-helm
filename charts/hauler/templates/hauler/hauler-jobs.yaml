@@ -26,7 +26,6 @@ spec:
             - |
               {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.store }}
               cp -av /local-store/* /store/   &&
-              chown -Rv 1001:1001 /store &&
               {{- end }}
               {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.hauls }}
               {{- range $index, $haul := .Values.haulerJobs.local.hauls }}
@@ -40,6 +39,7 @@ spec:
               cp -v /tmp/local-manifest-{{ $index }}/{{ $manifest.name }} /manifests/local-manifest-{{ $index }}/ &&
               {{- end}}
               {{- end}}
+              chown -Rv 1001:1001 /store &&
               echo hauler fetch completed
           volumeMounts:
             {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.hauls (gt (len .Values.haulerJobs.remote.hauls) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.hauls (gt (len .Values.haulerJobs.local.hauls) 0)) }}

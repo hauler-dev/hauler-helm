@@ -12,13 +12,6 @@
 
 ## Configuration
 
-### Adding the Helm Chart via CLI
-
-```bash
-helm repo add hauler-helm https://hauler-dev.github.io/hauler-helm
-helm repo update
-```
-
 ### Adding the Helm Chart via OCI
 
 #### via GitHub Container Registry
@@ -31,6 +24,13 @@ ghcr.io/hauler-dev/hauler-helm
 
 ```bash
 docker.io/hauler/hauler-helm
+```
+
+### Adding the Helm Chart via CLI
+
+```bash
+helm repo add hauler-helm https://hauler-dev.github.io/hauler-helm
+helm repo update
 ```
 
 ### Adding the Helm Chart via Rancher Manager
