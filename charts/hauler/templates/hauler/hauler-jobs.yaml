@@ -88,7 +88,7 @@ spec:
             {{- end }}
             {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.hauls (gt (len .Values.haulerJobs.remote.hauls) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.hauls (gt (len .Values.haulerJobs.local.hauls) 0)) }}
             {{- range .Values.haulerJobs.remote.hauls }}
-              hauler store --store /store load --filename /hauls/{{ .name }} &&
+              hauler store --store /store load --filename {{ .path }} &&
             {{- end }}
             {{- range $index, $haul := .Values.haulerJobs.local.hauls }}
               hauler store --store /store load --filename /hauls/local-haul-{{ $index }}/{{ $haul.name }} &&

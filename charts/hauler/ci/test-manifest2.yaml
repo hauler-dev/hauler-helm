@@ -15,6 +15,7 @@ spec:
   charts:
     - name: hauler-helm
       repoURL: oci://ghcr.io/hauler-dev
+      version: 2.0.2
 ---
 apiVersion: content.hauler.cattle.io/v1
 kind: Files

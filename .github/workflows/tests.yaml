@@ -70,7 +70,7 @@ jobs:
           echo -n "waiting for registries to start"
           while kubectl get po -A -lapp=hauler-registry -ojsonpath='{.items[*].status.containerStatuses[*].ready}' | grep -q "false"
           do
-            echo -n . ; sleep 5
+            echo -n . ; sleep 5;
             COUNTER=$((COUNTER+1))
             if [ $COUNTER -gt $MAXWAIT ]
             then
