@@ -15,7 +15,7 @@ spec:
   charts:
     - name: cert-manager
       repoURL: http://charts.jetstack.io
-      version: v1.17.3
+      version: v1.17.2
 ---
 apiVersion: content.hauler.cattle.io/v1
 kind: Files
