@@ -9,7 +9,7 @@ hauler:
 
   image:
     repository: hauler/hauler
-    tag: 1.2.3
+    tag: 1.2.4
   imagePullPolicy: Always
 
   initContainers:
@@ -29,7 +29,7 @@ hauler:
     enabled: true
     image:
       repository: hauler/hauler-debug
-      tag: 1.2.3
+      tag: 1.2.4
     imagePullPolicy: Always
     command: ["/bin/sh"]
     args: ["-c", "sleep infinity"]

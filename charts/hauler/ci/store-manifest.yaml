@@ -5,7 +5,7 @@ metadata:
   name: hauler-content-images-example
 spec:
   images:
-    - name: ghcr.io/hauler-dev/hauler:1.2.3
+    - name: ghcr.io/hauler-dev/hauler:1.2.4
 ---
 apiVersion: content.hauler.cattle.io/v1
 kind: Charts
