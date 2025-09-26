@@ -5,6 +5,27 @@ entries:
       classification: UNCLASSIFIED
     apiVersion: v2
     appVersion: 1.2.5
+    created: "2025-09-26T12:53:20.917228904Z"
+    description: Hauler Helm Chart - Airgap Swiss Army Knife
+    digest: 97ea41c6ac8d3d5217705f51cd98790f65cb0b5b4ea79bb170d748d71b6b61f9
+    home: https://github.com/hauler-dev
+    icon: https://raw.githubusercontent.com/hauler-dev/hauler/main/static/rgs-hauler-logo-icon.svg
+    maintainers:
+    - email: hauler@ranchergovernment.com
+      name: Rancher Government
+      url: https://ranchergovernment.com
+    name: hauler-helm
+    sources:
+    - https://github.com/hauler-dev/hauler
+    - https://github.com/hauler-dev/hauler-helm
+    type: application
+    urls:
+    - https://github.com/hauler-dev/hauler-helm/releases/download/hauler-helm-2.0.8/hauler-helm-2.0.8.tgz
+    version: 2.0.8
+  - annotations:
+      classification: UNCLASSIFIED
+    apiVersion: v2
+    appVersion: 1.2.5
     created: "2025-07-15T03:18:44.877913374Z"
     description: Hauler Helm Chart - Airgap Swiss Army Knife
     digest: ba5c613afd3c3a58edfe0e18b278aa6470e0a08b8258caef0136c4a02f192da9
@@ -257,4 +278,4 @@ entries:
     urls:
     - https://github.com/hauler-dev/hauler-helm/releases/download/hauler-helm-1.0.4/hauler-helm-1.0.4.tgz
     version: 1.0.4
-generated: "2025-07-15T03:18:44.87802832Z"
+generated: "2025-09-26T12:53:20.917346244Z"
