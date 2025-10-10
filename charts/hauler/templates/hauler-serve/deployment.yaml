@@ -1,8 +1,8 @@
-{{- if and (not .Values.haulerFileserver.enabled) (not .Values.haulerRegistry.enabled) (or .Values.haulerJobs.remote .Values.haulerJobs.local) (or (and .Values.haulerJobs.local .Values.haulerJobs.local.store) (and .Values.haulerJobs.remote .Values.haulerJobs.remote.hauls (gt (len .Values.haulerJobs.remote.hauls) 0)) (and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0))  (and .Values.haulerJobs.local .Values.haulerJobs.local.hauls (gt (len .Values.haulerJobs.local.hauls) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0))  ) }}
-apiVersion: batch/v1
-kind: Job
+{{- if or .Values.haulerRegistry.enabled .Values.haulerFileserver.enabled }}
+apiVersion: apps/v1
+kind: Deployment
 metadata:
-  name: hauler-loader
+  name: hauler-serve
   namespace: {{ .Release.Namespace }}
   labels:
     {{- include "hauler.labels" . | nindent 4 }}
@@ -10,15 +10,29 @@ metadata:
 {{ toYaml . | nindent 4 }}
     {{- end }}
   annotations:
-    "helm.sh/hook": post-install,post-upgrade
-    "helm.sh/hook-weight": "1"
     {{- with .Values.hauler.annotations -}}
 {{ toYaml . | nindent 4 }}
     {{- end }}
 spec:
+  replicas: {{ .Values.haulerRegistry.replicas }}
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+  selector:
+    matchLabels:
+      app: hauler-serve
+      {{- include "hauler.selectorLabels" . | nindent 6 }}
   template:
+    metadata:
+      annotations:
+        autorollout: {{ randAlphaNum 5 | quote }}
+      labels:
+        app: hauler-serve
+        {{- include "hauler.selectorLabels" . | nindent 8 }}
     spec:
-      {{- if or (and .Values.haulerJobs.local .Values.haulerJobs.local.store) (and .Values.haulerJobs.local .Values.haulerJobs.local.hauls (gt (len .Values.haulerJobs.local.hauls) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0)) }}
+    {{- if and (or .Values.haulerJobs.remote .Values.haulerJobs.local) (or (and .Values.haulerJobs.local .Values.haulerJobs.local.store) (and .Values.haulerJobs.remote .Values.haulerJobs.remote.hauls (gt (len .Values.haulerJobs.remote.hauls) 0)) (and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0))  (and .Values.haulerJobs.local .Values.haulerJobs.local.hauls (gt (len .Values.haulerJobs.local.hauls) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0))  ) }}
       {{- if .Values.haulerJobs.localNode }}
       nodeSelector:
         kubernetes.io/hostname: {{ .Values.haulerJobs.localNode }}
@@ -77,8 +91,6 @@ spec:
               mountPath: /store
           securityContext:
             runAsUser: 0
-      {{- end }}
-      containers:
         - name: hauler-load
           image: {{ .Values.haulerJobs.image.repository }}:{{ .Values.haulerJobs.image.tag }}
           imagePullPolicy: {{ .Values.hauler.imagePullPolicy }}
@@ -122,8 +134,92 @@ spec:
             runAsUser: 1001
             seccompProfile:
               type: RuntimeDefault
-      restartPolicy: OnFailure
+    {{- end }}
+      containers:
+        {{- if .Values.haulerRegistry.enabled }}
+        - name: hauler-registry
+          image: {{ .Values.hauler.image.repository }}:{{ .Values.hauler.image.tag }}
+          imagePullPolicy: {{ .Values.hauler.imagePullPolicy }}
+          args: ["store", "serve", "registry", "--port", "{{ .Values.haulerRegistry.port }}"]
+          ports:
+            - containerPort: {{ .Values.haulerRegistry.port }}
+          volumeMounts:
+            - name: hauler-data
+              mountPath: /store
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.haulerRegistry.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.haulerRegistry.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            failureThreshold: 5
+          startupProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.haulerRegistry.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            failureThreshold: {{ .Values.haulerRegistry.delayStart | default 0 }}
+        {{- end }}
+        {{- if .Values.haulerFileserver.enabled }}
+        - name: hauler-fileserver
+          image: {{ .Values.hauler.image.repository }}:{{ .Values.hauler.image.tag }}
+          imagePullPolicy: {{ .Values.hauler.imagePullPolicy }}
+          args: ["store", "serve", "fileserver", "--port", "{{ .Values.haulerFileserver.port }}"]
+          ports:
+            - containerPort: {{ .Values.haulerFileserver.port }}
+          volumeMounts:
+            - name: hauler-data
+              mountPath: /store
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
+          readinessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.haulerFileserver.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.haulerFileserver.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 15
+            failureThreshold: 5
+          startupProbe:
+            httpGet:
+              path: /
+              port: {{ .Values.haulerFileserver.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 15
+            failureThreshold: {{ .Values.haulerFileserver.delayStart | default 0 }}
+        {{- end }}
+      restartPolicy: Always
+      serviceAccountName: hauler-service-account
       volumes:
+        {{- if and (or .Values.haulerJobs.remote .Values.haulerJobs.local) (or (and .Values.haulerJobs.local .Values.haulerJobs.local.store) (and .Values.haulerJobs.remote .Values.haulerJobs.remote.hauls (gt (len .Values.haulerJobs.remote.hauls) 0)) (and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0))  (and .Values.haulerJobs.local .Values.haulerJobs.local.hauls (gt (len .Values.haulerJobs.local.hauls) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0))  ) }}
         {{- if or (and .Values.haulerJobs.remote .Values.haulerJobs.remote.hauls (gt (len .Values.haulerJobs.remote.hauls) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.hauls (gt (len .Values.haulerJobs.local.hauls) 0)) }}
         - name: haul-data
           emptyDir:
@@ -150,6 +246,7 @@ spec:
         - name: store-data
           hostPath:
             path: {{ .Values.haulerJobs.local.store }}
+        {{- end }}
         {{- end }}
         - name: hauler-data
           persistentVolumeClaim:

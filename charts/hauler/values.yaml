@@ -21,12 +21,12 @@ hauler:
 
   data:
     pvc:
-      accessModes: ReadWriteMany
+      accessModes: ReadWriteOnce
       # storageClass: longhorn # optional... will use default storage class
       storageRequest: 48Gi  # recommended size of 3x the artifact(s)
 
   debug:
-    enabled: true
+    enabled: false
     image:
       repository: hauler/hauler-debug
       tag: 1.2.5

@@ -15,7 +15,7 @@ metadata:
     {{- end }}
 spec:
   selector:
-    app: hauler-registry
+    app: hauler-serve
   ports:
     - name: hauler-registry
       protocol: {{ .Values.haulerRegistry.service.ports.protocol }}

@@ -15,7 +15,7 @@ metadata:
     {{- end }}
 spec:
   selector:
-    app: hauler-fileserver
+    app: hauler-serve
   ports:
     - name: hauler-fileserver
       protocol: {{ .Values.haulerFileserver.service.ports.protocol }}
