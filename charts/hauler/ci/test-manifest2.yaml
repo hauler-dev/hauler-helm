@@ -5,7 +5,7 @@ metadata:
   name: hauler-content-images-example
 spec:
   images:
-    - name: ghcr.io/hauler-dev/hauler-debug:1.2.5
+    - name: ghcr.io/hauler-dev/hauler-debug:1.3.0
 ---
 apiVersion: content.hauler.cattle.io/v1
 kind: Charts
@@ -15,7 +15,7 @@ spec:
   charts:
     - name: hauler-helm
       repoURL: oci://ghcr.io/hauler-dev
-      version: 2.0.6
+      version: 2.0.8
 ---
 apiVersion: content.hauler.cattle.io/v1
 kind: Files
