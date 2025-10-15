@@ -30,6 +30,9 @@ jobs:
       - name: Set Up Helm Chart Testing
         uses: helm/chart-testing-action@v2.7.0
 
+      - name: Set Up Hauler
+        run: curl -sfL https://get.hauler.dev | bash
+
       - name: Run Chart Testing
         run: ct lint --target-branch ${{ github.event.repository.default_branch }} --all --config ct.yaml
 
@@ -50,8 +53,6 @@ jobs:
           curl -o /tmp/tests/local-haul.tar.zst https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/haul.tar.zst
           echo "Download local-manifest.yaml"
           curl -o /tmp/tests/local-manifest.yaml https://raw.githubusercontent.com/hauler-dev/hauler-helm/main/charts/hauler/ci/test-manifest2.yaml
-          echo "Download hauler binary"
-          curl -sfL https://get.hauler.dev | HAULER_VERSION=1.2.0 bash
           echo "Create local store"
           hauler store -s /tmp/tests/store load --filename /tmp/tests/local-haul.tar.zst
           echo "Store built in /tmp/tests/store"
