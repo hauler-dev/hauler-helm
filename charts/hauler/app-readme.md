@@ -2,7 +2,7 @@
 
 | Type        | Chart Version | App Version |
 | ----------- | ------------- | ----------- |
-| application | `2.0.8`       | `1.2.5`     |
+| application | `2.1.0`       | `1.3.0`     |
 
 ## Installing the Chart
 
