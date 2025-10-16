@@ -216,6 +216,28 @@ spec:
             periodSeconds: 15
             failureThreshold: {{ .Values.haulerFileserver.delayStart | default 0 }}
         {{- end }}
+        {{- if .Values.hauler.debug.enabled }}
+        - name: hauler-debug
+          image: {{ .Values.hauler.debug.image.repository }}:{{ .Values.hauler.debug.image.tag }}
+          imagePullPolicy: {{ .Values.hauler.debug.imagePullPolicy }}
+          command: {{ .Values.hauler.debug.command }}
+          args: {{ .Values.hauler.debug.args }}
+          volumeMounts:
+            - name: hauler-data
+              mountPath: /store
+            - name: hauler-hauls
+              mountPath: /hauls
+            - name: hauler-manifests
+              mountPath: /manifests
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop: ["ALL"]
+            runAsNonRoot: true
+            runAsUser: 1001
+            seccompProfile:
+              type: RuntimeDefault
+        {{- end }}
       restartPolicy: Always
       serviceAccountName: hauler-service-account
       volumes:
