@@ -9,7 +9,7 @@ hauler:
 
   image:
     repository: hauler/hauler
-    tag: 1.3.0
+    tag: 1.3.1
   imagePullPolicy: Always
 
   initContainers:
@@ -29,7 +29,7 @@ hauler:
     enabled: false
     image:
       repository: hauler/hauler-debug
-      tag: 1.3.0
+      tag: 1.3.1
     imagePullPolicy: Always
     command: ["/bin/sh"]
     args: ["-c", "sleep infinity"]
@@ -42,7 +42,7 @@ haulerJobs:
               # not needed if only using "remote" sources
   image:
     repository: hauler/hauler-debug
-    tag: 1.3.0
+    tag: 1.3.1
   imagePullPolicy: Always
   remote:   # remote refers to hauls/manifests accessible via URLs
     hauls:
