@@ -12,7 +12,7 @@
 
 ```bash
 helm repo add hauler-helm https://hauler-dev.github.io/hauler-helm
-helm upgrade -i hauler hauler-helm/hauler -n hauler-system -f values.yaml
+helm upgrade -i hauler hauler-helm/hauler-helm -n hauler-system -f values.yaml
 ```
 
 ### Helm Install via Registry
