@@ -24,6 +24,9 @@ metadata:
 {{ toYaml . | nindent 4 }}
     {{- end }}
 spec:
+  {{- if .Values.haulerRegistry.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.haulerRegistry.ingress.ingressClassName }}
+  {{- end }}
   rules:
   - host: {{ .Values.haulerRegistry.ingress.hostname }}
     http:

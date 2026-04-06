@@ -84,6 +84,7 @@ haulerFileserver:
     #   key: value
     # annotations:
     #   key: value
+    # ingressClassName: ""  # optional... uses default ingress class
     hostname: fileserver.ranchers.io
     tls:
       enabled: false
@@ -113,6 +114,7 @@ haulerRegistry:
     #   key: value
     # annotations:
     #   key: value
+    # ingressClassName: ""  # optional... uses default ingress class
     hostname: registry.ranchers.io
     tls:
       enabled: false

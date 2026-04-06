@@ -20,6 +20,9 @@ metadata:
 {{ toYaml . | nindent 4 }}
     {{- end }}
 spec:
+  {{- if .Values.haulerFileserver.ingress.ingressClassName }}
+  ingressClassName: {{ .Values.haulerFileserver.ingress.ingressClassName }}
+  {{- end }}
   rules:
   - host: {{ .Values.haulerFileserver.ingress.hostname }}
     http:
