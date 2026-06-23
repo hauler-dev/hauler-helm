@@ -8,7 +8,7 @@
 
 **GitHub Repostiory:** https://github.com/hauler-dev/hauler
 
-**Documentation:** http://hauler.dev
+**Documentation:** http://docs.hauler.dev
 
 ## Configuration
 

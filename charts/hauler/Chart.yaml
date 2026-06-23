@@ -1,7 +1,7 @@
 apiVersion: v2
 name: hauler-helm
-version: 2.2.4
-appVersion: 1.4.3
+version: 2.3.0
+appVersion: 2.0.0
 
 type: application
 description: Hauler Helm Chart - Airgap Swiss Army Knife
@@ -11,6 +11,7 @@ home: https://github.com/hauler-dev
 sources:
   - https://github.com/hauler-dev/hauler
   - https://github.com/hauler-dev/hauler-helm
+  - https://github.com/hauler-dev/hauler-docs
 
 maintainers:
   - name: Rancher Government
