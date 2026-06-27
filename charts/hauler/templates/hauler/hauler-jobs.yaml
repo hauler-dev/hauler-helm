@@ -1,4 +1,4 @@
-{{- if and (or .Values.haulerJobs.remote .Values.haulerJobs.local) (or (and .Values.haulerJobs.local .Values.haulerJobs.local.store) (and .Values.haulerJobs.remote .Values.haulerJobs.remote.hauls (gt (len .Values.haulerJobs.remote.hauls) 0)) (and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0))  (and .Values.haulerJobs.local .Values.haulerJobs.local.hauls (gt (len .Values.haulerJobs.local.hauls) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0))  ) }}
+{{- if and (or .Values.haulerJobs.remote .Values.haulerJobs.local .Values.haulerJobs.store) (or .Values.haulerJobs.store (and .Values.haulerJobs.remote .Values.haulerJobs.remote.hauls (gt (len .Values.haulerJobs.remote.hauls) 0)) (and .Values.haulerJobs.remote .Values.haulerJobs.remote.manifests (gt (len .Values.haulerJobs.remote.manifests) 0))  (and .Values.haulerJobs.local .Values.haulerJobs.local.hauls (gt (len .Values.haulerJobs.local.hauls) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0))  ) }}
 apiVersion: batch/v1
 kind: Job
 metadata:
@@ -18,7 +18,7 @@ metadata:
 spec:
   template:
     spec:
-      {{- if or (and .Values.haulerJobs.local .Values.haulerJobs.local.store) (and .Values.haulerJobs.local .Values.haulerJobs.local.hauls (gt (len .Values.haulerJobs.local.hauls) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0)) }}
+      {{- if or .Values.haulerJobs.store (and .Values.haulerJobs.local .Values.haulerJobs.local.hauls (gt (len .Values.haulerJobs.local.hauls) 0)) (and .Values.haulerJobs.local .Values.haulerJobs.local.manifests (gt (len .Values.haulerJobs.local.manifests) 0)) }}
       {{- if .Values.haulerJobs.localNode }}
       nodeSelector:
         kubernetes.io/hostname: {{ .Values.haulerJobs.localNode }}
@@ -31,7 +31,7 @@ spec:
           args:
             - |
               rm -rf /store/*
-              {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.store }}
+              {{- if .Values.haulerJobs.store }}
               cp -av /local-store/* /store/   &&
               {{- end }}
               {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.hauls }}
@@ -69,7 +69,7 @@ spec:
               mountPath: /tmp/local-manifest-{{ $index }}
             {{- end }}
             {{- end }}
-            {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.store }}
+            {{- if .Values.haulerJobs.store }}
             - name: store-data
               mountPath: /local-store
             {{- end }}
@@ -146,10 +146,10 @@ spec:
             path: {{ $manifest.path }}
         {{- end }}
         {{- end }}
-        {{- if and .Values.haulerJobs.local .Values.haulerJobs.local.store }}
+        {{- if .Values.haulerJobs.store }}
         - name: store-data
           hostPath:
-            path: {{ .Values.haulerJobs.local.store }}
+            path: {{ .Values.haulerJobs.store }}
         {{- end }}
         - name: hauler-data
           persistentVolumeClaim:

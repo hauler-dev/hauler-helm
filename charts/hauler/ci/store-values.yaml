@@ -2,81 +2,92 @@
 # Docs: https://hauler.dev
 
 hauler:
+  # labels:
+  #   key: value
+  # annotations:
+  #   key: value
+
   image:
     repository: hauler/hauler
-    tag: 1.2.0
+    tag: 2.0.0
   imagePullPolicy: Always
 
   initContainers:
     image:
       repository: rancher/kubectl
-      tag: v1.34.1         # update to your kubernetes version
+      tag: v1.35.2  # update to your kubernetes version
     imagePullPolicy: Always
     timeout: 1h
 
   data:
     pvc:
-      accessModes: ReadWriteOnce
+      accessModes: ReadWriteMany
       # storageClass: longhorn # optional... will use default storage class
-      storageRequest: 5Gi  # recommended size of 3x the artifact(s)
-      test: true
+      storageRequest: 48Gi  # recommended size of 3x the artifact(s)
 
   debug:
     enabled: false
+    image:
+      repository: hauler/hauler-debug
+      tag: 2.0.0
+    imagePullPolicy: Always
+    command: ["/bin/sh"]
+    args: ["-c", "sleep infinity"]
 
 # Helm Chart Values for the Hauler Jobs
-# Docs: https://rancherfederal.github.io/hauler-docs/docs/introduction/quickstart
-# Hauler Jobs are used to populate the Registry and/or Filestore with content
-# Use "local" in order to populate the hauler store with locally available stores, hauls, and/or manifests.
-# Use "remote" if these are remotely (HTTP/S/FTP/etc) available instead
-# Simply comment out any unneeded values
+# Docs: https://docs.hauler.dev/docs/introduction/quickstart
 
 haulerJobs:
+  localNode:  # set the name of the Kube node (kubectl get nodes) which contains the hauls/manifests/stores if using "local.hauls", "local.manifests", or "store" below
+              # not needed if only using "remote" sources
   image:
     repository: hauler/hauler-debug
-    tag: 1.2.0
+    tag: 2.0.0
   imagePullPolicy: Always
-  # "remote" refers to URL-based hauler hauls and/or manifests
-  remote:
+  remote:   # remote refers to hauls/manifests accessible via URLs
     hauls:
       # - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/haul.tar.zst
       #   name: remhaul.tar.zst
-      # - path: /path/to/additional-hauls.tar.zst
+      # - path: https://path/to/additional-hauls.tar.zst
       #   name: additional-hauls.tar.zst
     manifests:
-      # - path: https://raw.githubusercontent.com/hauler-dev/hauler-helm/main/charts/hauler/ci/test-manifest.yaml
+      # - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/hauler-manifest.yaml
       #   name: remhauler-manifest.yaml
-      # - path: /path/to/additional-manifests.yaml
+      # - path: https://path/to/additional-manifests.yaml
       #   name: additional-manifests.yaml
-  # "local" refers to the host the container/kubectl is being run on.  Use filesystem paths (hostDir) for these values.
-  local:
+  local:  # local refers to hauls/manifests accessible via the local filesystem/filepaths/filenames
     hauls:
-      # - path: /usr/local/testdata/haul.tar.zst
-      #  name: haul.tar.zst
-      # - path: /path/to/additional-hauls.tar.zst
+      # - path: /usr/local/testdata/
+      #   name: haul.tar.zst
+      # - path: /path/to/directory/
       #   name: additional-hauls.tar.zst
     manifests:
-      # - path: /usr/local/testdata/hauler-manifest.yaml
-      #  name: hauler-manifest.yaml
-      # - path: /path/to/additional-manifests.yaml
+      # - path: /usr/local/testdata/
+      #   name: hauler-manifest.yaml
+      # - path: /path/to/directory/
       #   name: additional-manifests.yaml
-   # "store" refers to a previously created hauler folder structure.  See the "-s" argument to hauler.  Only one path is acceptable
-    store: /tmp/tests/store
+  # store refers to a previously created hauler store directory and structure
+  # only the filepath is acceptable argument
+  store: /tmp/tests/store
 
 # Helm Chart Values for the Hauler Fileserver
-# Docs: https://rancherfederal.github.io/hauler-docs/docs/guides-references/command-line/hauler-store#hauler-store-serve-fileserver
-#
+# Docs: https://docs.hauler.dev/docs/hauler-usage/store/serve/fileserver
 
 haulerFileserver:
   enabled: true
   port: 8080  # default port for the fileserver
   replicas: 1
-
+  delayStart: 0  # how long for health checks to wait to start checking, 15-second intervals
   ingress:
     enabled: true
+    # labels:
+    #   key: value
+    # annotations:
+    #   key: value
+    # ingressClassName: ""  # optional... uses default ingress class
     hostname: fileserver.ranchers.io
     tls:
-      enabled: true
+      enabled: false
       source: secret         # only supported source
       secretName: tls-certs  # must be created outside of this chart
 
@@ -89,20 +100,26 @@ haulerFileserver:
       targetPort: 8080  # default port for the fileserver
 
 # Helm Chart Values for the Hauler Registry
-# Docs: https://rancherfederal.github.io/hauler-docs/docs/guides-references/command-line/hauler-store#hauler-store-serve-registry
+# Docs: https://docs.hauler.dev/docs/hauler-usage/store/serve/registry
 
 haulerRegistry:
   enabled: true
-  port: 5000      # default port for the registry
+  port: 5000  # default port for the registry
   replicas: 1
+  delayStart: 0  # how long for health checks to wait to start checking, in 15-second intervals
 
   ingress:
     enabled: true
+    # labels:
+    #   key: value
+    # annotations:
+    #   key: value
+    # ingressClassName: ""  # optional... uses default ingress class
     hostname: registry.ranchers.io
     tls:
-      enabled: true
-      source: secret          # only supported source
-      secretName: tls-certs   # must be created outside of this chart
+      enabled: false
+      source: secret         # only supported source
+      secretName: tls-certs  # must be created outside of this chart
 
   service:
     enabled: true
