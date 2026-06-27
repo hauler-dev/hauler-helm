@@ -4,13 +4,13 @@
 hauler:
   image:
     repository: hauler/hauler
-    tag: 1.2.0
+    tag: 2.0.0
   imagePullPolicy: Always
 
   initContainers:
     image:
       repository: rancher/kubectl
-      tag: v1.34.1         # update to your kubernetes version
+      tag: v1.35.2  # update to your kubernetes version
     imagePullPolicy: Always
     timeout: 1h
 
@@ -34,7 +34,7 @@ hauler:
 haulerJobs:
   image:
     repository: hauler/hauler-debug
-    tag: 1.2.0
+    tag: 2.0.0
   imagePullPolicy: Always
   # "remote" refers to URL-based hauler hauls and/or manifests
   remote:
