@@ -21,9 +21,10 @@ hauler:
 
   data:
     pvc:
-      accessModes: ReadWriteMany
+      accessModes: ReadWriteOnce
       # storageClass: longhorn # optional... will use default storage class
-      storageRequest: 48Gi  # recommended size of 3x the artifact(s)
+      storageRequest: 5Gi  # recommended size of 3x the artifact(s)
+      test: true
 
   debug:
     enabled: false
