@@ -1,1 +1,1 @@
-{"repositories":["hauler/hauler-helm","hauler/hauler-manifest.yaml","hauler/install.sh","hauler/rancher","hauler-dev/hauler-debug","library/busybox"]}
+{"repositories":["distroless/base","hauler/hauler-helm","hauler/hauler-manifest.yaml","hauler/install.sh","hauler/rancher","hauler-dev/hauler-debug","library/busybox"]}
