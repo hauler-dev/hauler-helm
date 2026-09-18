@@ -9,7 +9,7 @@ hauler:
 
   image:
     repository: hauler/hauler
-    tag: 2.1.0
+    tag: 2.1.1
   imagePullPolicy: Always
 
   initContainers:
@@ -29,7 +29,7 @@ hauler:
     enabled: false
     image:
       repository: hauler/hauler-debug
-      tag: 2.1.0
+      tag: 2.1.1
     imagePullPolicy: Always
     command: ["/bin/sh"]
     args: ["-c", "sleep infinity"]
@@ -39,12 +39,11 @@ hauler:
 
 haulerJobs:
   localNode:  # set the name of the Kube node (kubectl get nodes) which contains the hauls/manifests/stores if using "local.hauls", "local.manifests", or "store" below
-              # not needed if only using "remote" sources
   image:
     repository: hauler/hauler-debug
-    tag: 2.1.0
+    tag: 2.1.1
   imagePullPolicy: Always
-  remote:   # remote refers to hauls/manifests accessible via URLs
+  remote:  # remote refers to hauls/manifests accessible via URLs
     hauls:
       # - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/haul.tar.zst
       #   name: remhaul.tar.zst
