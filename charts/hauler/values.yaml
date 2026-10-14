@@ -9,13 +9,13 @@ hauler:
 
   image:
     repository: hauler/hauler
-    tag: 2.1.1
+    tag: 2.1.2
   imagePullPolicy: Always
 
   initContainers:
     image:
       repository: rancher/kubectl
-      tag: v1.35.2  # update to your kubernetes version
+      tag: v1.36.5  # update to your kubernetes version
     imagePullPolicy: Always
     timeout: 1h
 
@@ -29,7 +29,7 @@ hauler:
     enabled: false
     image:
       repository: hauler/hauler-debug
-      tag: 2.1.1
+      tag: 2.1.2
     imagePullPolicy: Always
     command: ["/bin/sh"]
     args: ["-c", "sleep infinity"]
@@ -41,7 +41,7 @@ haulerJobs:
   localNode:  # set the name of the Kube node (kubectl get nodes) which contains the hauls/manifests/stores if using "local.hauls", "local.manifests", or "store" below
   image:
     repository: hauler/hauler-debug
-    tag: 2.1.1
+    tag: 2.1.2
   imagePullPolicy: Always
   remote:  # remote refers to hauls/manifests accessible via URLs
     hauls:

@@ -15,7 +15,7 @@ hauler:
   initContainers:
     image:
       repository: rancher/kubectl
-      tag: v1.35.2  # update to your kubernetes version
+      tag: v1.36.5  # update to your kubernetes version
     imagePullPolicy: Always
     timeout: 1h
 
