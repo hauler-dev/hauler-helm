@@ -2,24 +2,13 @@
 # Docs: https://hauler.dev
 
 hauler:
-  image:
-    repository: hauler/hauler
-    tag: 2.0.0
-  imagePullPolicy: Always
 
-  initContainers:
-    image:
-      repository: rancher/kubectl
-      tag: v1.35.2  # update to your kubernetes version
-    imagePullPolicy: Always
-    timeout: 1h
 
   data:
     pvc:
       accessModes: ReadWriteOnce
       # storageClass: longhorn # optional... will use default storage class
       storageRequest: 5Gi  # recommended size of 3x the artifact(s)
-      test: true
 
   debug:
     enabled: false
@@ -32,10 +21,6 @@ hauler:
 # Simply comment out any unneeded values
 
 haulerJobs:
-  image:
-    repository: hauler/hauler-debug
-    tag: 2.0.0
-  imagePullPolicy: Always
   # "remote" refers to URL-based hauler hauls and/or manifests
   remote:
     hauls:

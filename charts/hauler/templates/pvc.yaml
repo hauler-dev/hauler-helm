@@ -1,0 +1,19 @@
+{{- if not .Values.hauler.data.pvc.existingClaim }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: {{ include "hauler.storeClaimName" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "hauler.labels" . | nindent 4 }}
+  {{- include "hauler.annotations" (dict "root" .) | nindent 2 }}
+spec:
+  accessModes:
+    - {{ include "hauler.accessMode" . }}
+  resources:
+    requests:
+      storage: {{ .Values.hauler.data.pvc.storageRequest }}
+  {{- with .Values.hauler.data.pvc.storageClass }}
+  storageClassName: {{ . }}
+  {{- end }}
+{{- end }}

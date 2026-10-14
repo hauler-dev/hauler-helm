@@ -1,0 +1,10 @@
+{{- if .Values.haulerRegistry.enabled }}
+{{- $args := list }}
+{{- if not .Values.haulerRegistry.readonly }}
+{{- if gt (int (include "hauler.replicas" (dict "root" . "cfg" .Values.haulerRegistry))) 1 }}
+{{- fail "haulerRegistry.readonly: false requires haulerRegistry.replicas: 1... replicas would write over each other's pushes" }}
+{{- end }}
+{{- $args = append $args "--readonly=false" }}
+{{- end }}
+{{ include "hauler.server" (dict "root" . "component" "registry" "cfg" .Values.haulerRegistry "args" $args) }}
+{{- end }}

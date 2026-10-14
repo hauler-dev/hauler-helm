@@ -1,0 +1,3 @@
+{{- if .Values.haulerFileserver.enabled }}
+{{ include "hauler.server" (dict "root" . "component" "fileserver" "cfg" .Values.haulerFileserver "args" list) }}
+{{- end }}

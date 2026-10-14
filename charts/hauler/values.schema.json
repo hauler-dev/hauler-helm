@@ -1,0 +1,180 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Hauler Helm Chart Values",
+  "type": "object",
+  "additionalProperties": false,
+  "properties": {
+    "nameOverride": { "type": "string" },
+    "fullnameOverride": { "type": "string" },
+    "global": {
+      "type": "object",
+      "properties": {
+        "mode": { "enum": ["standalone", "ha"] },
+        "imageRegistry": { "type": "string" },
+        "imagePullPolicy": { "enum": ["Always", "IfNotPresent", "Never"] },
+        "imagePullSecrets": { "type": "array" },
+        "logLevel": { "enum": ["", "trace", "debug", "info", "warn", "error"] },
+        "auditLevel": { "enum": ["", "none", "standard", "verbose"] },
+        "ignoreErrors": { "type": "boolean" },
+        "retries": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "const": "" }] },
+        "concurrency": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "const": "" }] },
+        "blobConcurrency": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "const": "" }] },
+        "labels": { "type": "object" },
+        "annotations": { "type": "object" },
+        "nodeSelector": { "type": "object" },
+        "tolerations": { "type": "array" }
+      }
+    },
+    "hauler": {
+      "type": "object",
+      "properties": {
+        "image": { "$ref": "#/definitions/image" },
+        "data": {
+          "type": "object",
+          "properties": {
+            "pvc": {
+              "type": "object",
+              "properties": {
+                "accessModes": { "enum": ["", "ReadWriteMany", "ReadWriteOnce", "ReadWriteOncePod"] },
+                "storageClass": { "type": "string" },
+                "storageRequest": { "type": ["string", "integer"] },
+                "existingClaim": { "type": "string" }
+              }
+            }
+          }
+        },
+        "work": { "$ref": "#/definitions/volumeSource" },
+        "debug": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "image": { "$ref": "#/definitions/image" }
+          }
+        }
+      }
+    },
+    "haulerJobs": {
+      "type": "object",
+      "properties": {
+        "localNode": { "type": ["string", "null"] },
+        "image": { "$ref": "#/definitions/image" },
+        "reset": { "type": "boolean" },
+        "revision": { "type": ["string", "integer"] },
+        "timeout": { "type": "string" },
+        "registryAuth": { "type": "string" },
+        "syncArgs": { "$ref": "#/definitions/stringList" },
+        "loadArgs": { "$ref": "#/definitions/stringList" },
+        "resources": { "type": "object" },
+        "nodeSelector": { "type": "object" },
+        "tolerations": { "type": "array" },
+        "tmp": { "$ref": "#/definitions/volumeSource" },
+        "remote": {
+          "type": ["object", "null"],
+          "properties": {
+            "hauls": { "$ref": "#/definitions/sourceList" },
+            "manifests": { "$ref": "#/definitions/sourceList" }
+          }
+        },
+        "local": {
+          "type": ["object", "null"],
+          "properties": {
+            "hauls": { "$ref": "#/definitions/sourceList" },
+            "manifests": { "$ref": "#/definitions/sourceList" }
+          }
+        },
+        "store": { "type": ["string", "null"] }
+      }
+    },
+    "haulerRegistry": { "$ref": "#/definitions/server" },
+    "haulerFileserver": { "$ref": "#/definitions/server" },
+    "haulerGit": { "$ref": "#/definitions/server" }
+  },
+  "definitions": {
+    "image": {
+      "type": "object",
+      "properties": {
+        "repository": { "type": "string" },
+        "tag": { "type": ["string", "number"] }
+      }
+    },
+    "stringList": {
+      "type": ["array", "null"],
+      "items": { "type": ["string", "number", "boolean"] }
+    },
+    "sourceList": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "object",
+        "required": ["path"],
+        "properties": {
+          "path": { "type": "string" },
+          "name": { "type": "string" }
+        }
+      }
+    },
+    "volumeSource": {
+      "description": "Any Kubernetes volume source... i.e. ephemeral or emptyDir",
+      "type": "object"
+    },
+    "server": {
+      "type": "object",
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+        "replicas": { "anyOf": [{ "type": "integer", "minimum": 0 }, { "const": "" }] },
+        "delayStart": { "type": "integer", "minimum": 0 },
+        "readonly": { "type": "boolean" },
+        "serveArgs": { "$ref": "#/definitions/stringList" },
+        "tls": {
+          "type": "object",
+          "properties": {
+            "secretName": { "type": "string" }
+          }
+        },
+        "basicAuth": {
+          "type": "object",
+          "properties": {
+            "secretName": { "type": "string" },
+            "realm": { "type": "string" }
+          }
+        },
+        "resources": { "type": "object" },
+        "nodeSelector": { "type": "object" },
+        "tolerations": { "type": "array" },
+        "ingress": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "labels": { "type": "object" },
+            "annotations": { "type": "object" },
+            "ingressClassName": { "type": "string" },
+            "hostname": { "type": "string" },
+            "tls": {
+              "type": "object",
+              "properties": {
+                "enabled": { "type": "boolean" },
+                "source": { "enum": ["secret"] },
+                "secretName": { "type": "string" }
+              }
+            }
+          }
+        },
+        "service": {
+          "type": "object",
+          "properties": {
+            "enabled": { "type": "boolean" },
+            "type": { "enum": ["ClusterIP", "NodePort", "LoadBalancer"] },
+            "ports": {
+              "type": "object",
+              "properties": {
+                "protocol": { "enum": ["TCP", "UDP", "SCTP"] },
+                "port": { "type": "integer", "minimum": 1, "maximum": 65535 },
+                "targetPort": { "type": ["integer", "string"] }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}

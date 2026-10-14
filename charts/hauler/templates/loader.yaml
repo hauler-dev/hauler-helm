@@ -1,0 +1,226 @@
+{{- $j := .Values.haulerJobs }}
+{{- $s := include "hauler.jobs.sources" . | fromJson }}
+{{- $usesLocal := eq (include "hauler.jobs.usesLocal" .) "true" }}
+{{- $haulerImage := include "hauler.image" (dict "root" . "image" .Values.hauler.image) }}
+{{- $jobsImage := include "hauler.image" (dict "root" . "image" $j.image) }}
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: {{ include "hauler.jobs.name" . }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "hauler.labels" . | nindent 4 }}
+  {{- include "hauler.annotations" (dict "root" .) | nindent 2 }}
+spec:
+  backoffLimit: 3
+  template:
+    metadata:
+      labels:
+        app: {{ include "hauler.fullname" . }}-loader
+        {{- include "hauler.selectorLabels" . | nindent 8 }}
+    spec:
+      restartPolicy: OnFailure
+      {{- include "hauler.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ include "hauler.fullname" . }}-service-account
+      automountServiceAccountToken: false
+      {{- include "hauler.podSecurityContext" . | nindent 6 }}
+      {{- include "hauler.scheduling" (dict "root" . "nodeSelector" $j.nodeSelector "tolerations" $j.tolerations "isJob" true) | nindent 6 }}
+      initContainers:
+        - name: hauler-setup
+          image: {{ $jobsImage }}
+          imagePullPolicy: {{ include "hauler.imagePullPolicy" . }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              if [ -f /hauler/index.json ] && [ ! -e /hauler/store ]; then
+                echo "moving the existing store into /hauler/store"
+                mkdir /hauler/store
+                for f in /hauler/* /hauler/.[!.]* /hauler/..?*; do
+                  [ -e "$f" ] || continue
+                  case "${f##*/}" in store|state|lost+found) continue ;; esac
+                  mv "$f" /hauler/store/
+                done
+              fi
+              mkdir -p /hauler/store /hauler/state/loader /hauler/serve
+              rm -f {{ include "hauler.jobs.marker" . }}
+              rm -rf /hauler/serve/{{ include "hauler.jobs.checksum" . }}.partial
+              {{- if or $s.reset $s.store }}
+              echo "emptying the store"
+              rm -rf /hauler/store/* /hauler/store/.[!.]* /hauler/store/..?*
+              {{- end }}
+              if [ ! -f /hauler/store/index.json ]; then
+                echo "creating an empty store"
+                mkdir -p /hauler/store/blobs/sha256
+                printf '%s' '{"schemaVersion":2,"mediaType":"application/vnd.oci.image.index.v1+json","manifests":[]}' > /hauler/store/index.json
+              fi
+              echo "hauler setup completed"
+          workingDir: /work
+          env:
+            {{- include "hauler.env" . | nindent 12 }}
+          {{- include "hauler.containerSecurityContext" . | nindent 10 }}
+          volumeMounts:
+            {{- include "hauler.mounts" . | nindent 12 }}
+        {{- if $usesLocal }}
+        - name: hauler-prepare
+          image: {{ $jobsImage }}
+          imagePullPolicy: {{ include "hauler.imagePullPolicy" . }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              {{- if $s.store }}
+              echo "copying store from {{ $s.store }}"
+              cp -a /local/store/. /hauler/store/
+              {{- end }}
+              {{- range $i, $m := $s.localManifests }}
+              mkdir -p /work/staging/manifests/{{ $i }}
+              cp -v "/local/manifest-{{ $i }}/{{ $m.name }}" /work/staging/manifests/{{ $i }}/
+              {{- end }}
+              {{- range $i, $h := $s.localHauls }}
+              mkdir -p /work/staging/hauls/{{ $i }}
+              cp -v "/local/haul-{{ $i }}/{{ $h.name }}" /work/staging/hauls/{{ $i }}/
+              {{- end }}
+              chown -R 1001:1001 /hauler/store /work
+              echo "hauler prepare completed"
+          workingDir: /work
+          env:
+            {{- include "hauler.env" . | nindent 12 }}
+          securityContext:
+            runAsUser: 0
+            runAsGroup: 0
+            runAsNonRoot: false
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: true
+            capabilities:
+              drop: ["ALL"]
+              add: ["CHOWN", "DAC_OVERRIDE", "FOWNER"]
+          volumeMounts:
+            {{- include "hauler.mounts" . | nindent 12 }}
+            {{- if $s.store }}
+            - name: local-store
+              mountPath: /local/store
+              readOnly: true
+            {{- end }}
+            {{- range $i, $m := $s.localManifests }}
+            - name: local-manifest-{{ $i }}
+              mountPath: /local/manifest-{{ $i }}
+              readOnly: true
+            {{- end }}
+            {{- range $i, $h := $s.localHauls }}
+            - name: local-haul-{{ $i }}
+              mountPath: /local/haul-{{ $i }}
+              readOnly: true
+            {{- end }}
+        {{- end }}
+        {{- $steps := list }}
+        {{- range $i, $m := $s.remoteManifests }}
+        {{- $steps = append $steps (dict "name" (printf "hauler-sync-remote-manifest-%d" $i) "args" (concat (list "store" "sync" "--filename" ($m.path | required "haulerJobs.remote.manifests[].path is required")) $s.syncArgs)) }}
+        {{- end }}
+        {{- range $i, $m := $s.localManifests }}
+        {{- $steps = append $steps (dict "name" (printf "hauler-sync-local-manifest-%d" $i) "args" (concat (list "store" "sync" "--filename" (printf "/work/staging/manifests/%d/%s" $i $m.name)) $s.syncArgs)) }}
+        {{- end }}
+        {{- range $i, $h := $s.remoteHauls }}
+        {{- $steps = append $steps (dict "name" (printf "hauler-load-remote-haul-%d" $i) "args" (concat (list "store" "load" "--filename" ($h.path | required "haulerJobs.remote.hauls[].path is required")) $s.loadArgs)) }}
+        {{- end }}
+        {{- range $i, $h := $s.localHauls }}
+        {{- $steps = append $steps (dict "name" (printf "hauler-load-local-haul-%d" $i) "args" (concat (list "store" "load" "--filename" (printf "/work/staging/hauls/%d/%s" $i $h.name)) $s.loadArgs)) }}
+        {{- end }}
+        {{- range $steps }}
+        - name: {{ .name }}
+          image: {{ $haulerImage }}
+          imagePullPolicy: {{ include "hauler.imagePullPolicy" $ }}
+          args:
+            {{- toYaml .args | nindent 12 }}
+          {{- include "hauler.jobs.containerCommon" $ | nindent 10 }}
+        {{- end }}
+        {{- range $component, $cfg := dict "registry" .Values.haulerRegistry "fileserver" .Values.haulerFileserver "git" .Values.haulerGit }}
+        {{- if $cfg.enabled }}
+        - name: hauler-build-{{ $component }}
+          image: {{ $jobsImage }}
+          imagePullPolicy: {{ include "hauler.imagePullPolicy" $ }}
+          command: ["/bin/bash", "-c"]
+          args:
+            - |
+              set -u
+              dir={{ include "hauler.serveBuildDir" (dict "root" $ "component" $component) }}
+              hauler store serve {{ $component }} --directory "$dir" --port {{ $cfg.port }} > /work/build-{{ $component }}.log 2>&1 &
+              pid=$!
+              until (echo > /dev/tcp/127.0.0.1/{{ $cfg.port }}) 2>/dev/null; do
+                if ! kill -0 "$pid" 2>/dev/null; then
+                  cat /work/build-{{ $component }}.log
+                  {{- if eq $component "git" }}
+                  if grep -q "no git repositories found" /work/build-{{ $component }}.log; then
+                    echo "no git repositories in the store... building an empty copy"
+                    mkdir -p "$dir"
+                    exit 0
+                  fi
+                  {{- end }}
+                  echo "hauler store serve {{ $component }} exited before building its copy"
+                  exit 1
+                fi
+                sleep 2
+              done
+              kill "$pid"
+              wait "$pid" 2>/dev/null
+              mkdir -p "$dir"
+              cat /work/build-{{ $component }}.log
+              echo "built the {{ $component }} copy in $dir"
+          {{- include "hauler.jobs.containerCommon" $ | nindent 10 }}
+        {{- end }}
+        {{- end }}
+      containers:
+        - name: hauler-complete
+          image: {{ $jobsImage }}
+          imagePullPolicy: {{ include "hauler.imagePullPolicy" . }}
+          command: ["/bin/sh", "-c"]
+          args:
+            - |
+              set -eu
+              hauler store info
+              sum={{ include "hauler.jobs.checksum" . }}
+              mkdir -p "/hauler/serve/$sum.partial"
+              if [ -d "/hauler/serve/$sum" ]; then
+                mv "/hauler/serve/$sum" "/hauler/serve/$sum.old"
+              fi
+              mv "/hauler/serve/$sum.partial" "/hauler/serve/$sum"
+              rm -rf "/hauler/serve/$sum.old" /hauler/serve/*.partial
+              ls -1dt /hauler/serve/????????/ | tail -n +3 | while read -r old; do
+                echo "removing the older server copies in $old"
+                rm -rf "$old"
+              done
+              touch {{ include "hauler.jobs.marker" . }}
+              echo "hauler jobs completed"
+          {{- include "hauler.jobs.containerCommon" . | nindent 10 }}
+      volumes:
+        - name: hauler-data
+          persistentVolumeClaim:
+            claimName: {{ include "hauler.storeClaimName" . }}
+        - name: work
+          {{- toYaml $j.tmp | nindent 10 }}
+        {{- with $j.registryAuth }}
+        - name: registry-auth
+          secret:
+            secretName: {{ . }}
+            items:
+              - key: .dockerconfigjson
+                path: config.json
+        {{- end }}
+        {{- with $s.store }}
+        - name: local-store
+          hostPath:
+            path: {{ . }}
+            type: Directory
+        {{- end }}
+        {{- range $i, $m := $s.localManifests }}
+        - name: local-manifest-{{ $i }}
+          hostPath:
+            path: {{ $m.path | required "haulerJobs.local.manifests[].path is required" }}
+            type: Directory
+        {{- end }}
+        {{- range $i, $h := $s.localHauls }}
+        - name: local-haul-{{ $i }}
+          hostPath:
+            path: {{ $h.path | required "haulerJobs.local.hauls[].path is required" }}
+            type: Directory
+        {{- end }}

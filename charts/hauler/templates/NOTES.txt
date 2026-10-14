@@ -1,0 +1,22 @@
+Hauler {{ .Values.hauler.image.tag | default .Chart.AppVersion }} is installed as release "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}".
+
+The hauler jobs are loading the store... follow them with:
+  kubectl logs -n {{ .Release.Namespace }} job/{{ include "hauler.jobs.name" . }} --all-containers --prefix -f
+The servers start once they complete.
+{{- range $key, $name := dict "haulerRegistry" "registry" "haulerFileserver" "fileserver" "haulerGit" "git" }}
+{{- $cfg := index $.Values $key }}
+{{- if $cfg.enabled }}
+
+hauler-{{ $name }}:
+{{- if $cfg.ingress.enabled }}
+  {{ if $cfg.ingress.tls.enabled }}https{{ else }}http{{ end }}://{{ $cfg.ingress.hostname }}
+{{- else if $cfg.service.enabled }}
+  kubectl port-forward -n {{ $.Release.Namespace }} svc/{{ include "hauler.fullname" $ }}-{{ $name }} {{ $cfg.service.ports.port }}
+{{- end }}
+{{- end }}
+{{- end }}
+{{- if .Values.hauler.debug.enabled }}
+
+hauler-debug:
+  kubectl exec -it -n {{ .Release.Namespace }} deploy/{{ include "hauler.fullname" . }}-debug -- bash
+{{- end }}

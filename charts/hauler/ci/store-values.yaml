@@ -7,33 +7,14 @@ hauler:
   # annotations:
   #   key: value
 
-  image:
-    repository: hauler/hauler
-    tag: 2.0.0
-  imagePullPolicy: Always
-
-  initContainers:
-    image:
-      repository: rancher/kubectl
-      tag: v1.35.2  # update to your kubernetes version
-    imagePullPolicy: Always
-    timeout: 1h
-
   data:
     pvc:
       accessModes: ReadWriteOnce
       # storageClass: longhorn # optional... will use default storage class
       storageRequest: 5Gi  # recommended size of 3x the artifact(s)
-      test: true
 
   debug:
     enabled: false
-    image:
-      repository: hauler/hauler-debug
-      tag: 2.0.0
-    imagePullPolicy: Always
-    command: ["/bin/sh"]
-    args: ["-c", "sleep infinity"]
 
 # Helm Chart Values for the Hauler Jobs
 # Docs: https://docs.hauler.dev/docs/introduction/quickstart
@@ -41,10 +22,6 @@ hauler:
 haulerJobs:
   localNode:  # set the name of the Kube node (kubectl get nodes) which contains the hauls/manifests/stores if using "local.hauls", "local.manifests", or "store" below
               # not needed if only using "remote" sources
-  image:
-    repository: hauler/hauler-debug
-    tag: 2.0.0
-  imagePullPolicy: Always
   remote:   # remote refers to hauls/manifests accessible via URLs
     hauls:
       # - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/haul.tar.zst

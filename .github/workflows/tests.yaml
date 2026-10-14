@@ -88,11 +88,8 @@ jobs:
                 name=$(basename ${testvalue}| rev | cut -c13- | rev)
                 namespace=hauler-${name}
                 echo Logs from NAMESPACE = $namespace
-                for container in hauler-fetch hauler-load
-                do
-                echo $container container in hauler-loader job logs:
-                kubectl logs --tail=100 -n $namespace -l=batch.kubernetes.io/job-name=hauler-loader -c $container
-                done
+                echo hauler-loader job logs:
+                kubectl logs --tail=100 -n $namespace -lapp=hauler-loader --all-containers --prefix || echo No logs for $namespace / hauler-loader
                 for container in hauler-fileserver hauler-registry
                 do
                   echo $container pod logs:
@@ -117,11 +114,8 @@ jobs:
                 name=$(basename ${testvalue}| rev | cut -c13- | rev)
                 namespace=hauler-${name}
                 echo Logs from NAMESPACE = $namespace
-                for container in hauler-fetch hauler-load
-                do
-                echo $container container in hauler-loader job logs:
-                kubectl logs --tail=100 -n $namespace -l=batch.kubernetes.io/job-name=hauler-loader -c ${container}  || echo No logs for $namespace / $container
-                done
+                echo hauler-loader job logs:
+                kubectl logs --tail=100 -n $namespace -lapp=hauler-loader --all-containers --prefix || echo No logs for $namespace / hauler-loader
                 for container in hauler-fileserver hauler-registry
                 do
                   echo $container pod logs:
@@ -174,11 +168,8 @@ jobs:
               name=$(basename ${testvalue}| rev | cut -c13- | rev)
               namespace=hauler-${name}
               echo Logs from NAMESPACE = $namespace
-              for container in hauler-fetch hauler-load
-              do
-              echo $container container in hauler-loader job logs:
-              kubectl logs --tail=100 -n $namespace -l=batch.kubernetes.io/job-name=hauler-loader -c ${container} || echo No logs for $namespace / $container
-              done
+              echo hauler-loader job logs:
+              kubectl logs --tail=100 -n $namespace -lapp=hauler-loader --all-containers --prefix || echo No logs for $namespace / hauler-loader
               for container in hauler-fileserver hauler-registry
               do
                 echo $container pod logs:

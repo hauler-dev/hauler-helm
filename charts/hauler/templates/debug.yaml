@@ -1,0 +1,48 @@
+{{- if .Values.hauler.debug.enabled }}
+{{- $app := printf "%s-debug" (include "hauler.fullname" .) }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ $app }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    {{- include "hauler.labels" . | nindent 4 }}
+  {{- include "hauler.annotations" (dict "root" .) | nindent 2 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ $app }}
+      {{- include "hauler.selectorLabels" . | nindent 6 }}
+  template:
+    metadata:
+      labels:
+        app: {{ $app }}
+        {{- include "hauler.selectorLabels" . | nindent 8 }}
+    spec:
+      {{- include "hauler.imagePullSecrets" . | nindent 6 }}
+      serviceAccountName: {{ include "hauler.fullname" . }}-service-account
+      automountServiceAccountToken: false
+      {{- include "hauler.podSecurityContext" . | nindent 6 }}
+      {{- include "hauler.scheduling" (dict "root" .) | nindent 6 }}
+      initContainers:
+        {{- include "hauler.jobs.wait" . | nindent 8 }}
+      containers:
+        - name: {{ $app }}
+          image: {{ include "hauler.image" (dict "root" . "image" .Values.hauler.debug.image) }}
+          imagePullPolicy: {{ include "hauler.imagePullPolicy" . }}
+          command: ["sleep", "infinity"]
+          workingDir: /work
+          env:
+            {{- include "hauler.env" . | nindent 12 }}
+          {{- include "hauler.containerSecurityContext" . | nindent 10 }}
+          volumeMounts:
+            {{- include "hauler.mounts" . | nindent 12 }}
+      restartPolicy: Always
+      volumes:
+        - name: hauler-data
+          persistentVolumeClaim:
+            claimName: {{ include "hauler.storeClaimName" . }}
+        - name: work
+          {{- toYaml .Values.hauler.work | nindent 10 }}
+{{- end }}

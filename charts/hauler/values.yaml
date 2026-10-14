@@ -1,49 +1,83 @@
 # Helm Chart Values for Hauler
 # Docs: https://hauler.dev
 
-hauler:
-  # labels:
-  #   key: value
-  # annotations:
-  #   key: value
+# optional... required for multiple releases in one namespace
+fullnameOverride: ""
 
+global:
+  # standalone... every pod on a single node (requires ReadWriteOnce)
+  # ha... server replicas spread across nodes (requires ReadWriteMany)
+  mode: standalone
+
+  # optional... registry prefix for every image
+  imageRegistry: ""
+  imagePullPolicy: IfNotPresent
+  imagePullSecrets: []
+  #   - name: registry-credentials
+
+  # hauler global flags... set for every hauler command in the chart
+  # optional... uses info (trace, debug, info, warn, error)
+  logLevel: ""
+  # optional... uses standard (none, standard, verbose)
+  auditLevel: ""
+  # warns and continues instead of failing on errors
+  ignoreErrors: false
+  # optional... uses 3
+  retries: ""
+  # optional... uses 5
+  concurrency: ""
+  # optional... uses 5
+  blobConcurrency: ""
+
+  # adds labels to every resource in the chart
+  labels: {}
+  # adds annotations to every resource in the chart
+  annotations: {}
+  # added to every pod, unless set for the component
+  nodeSelector: {}
+  # added to every pod, unless set for the component
+  tolerations: []
+
+hauler:
   image:
     repository: hauler/hauler
-    tag: 2.1.1
-  imagePullPolicy: Always
-
-  initContainers:
-    image:
-      repository: rancher/kubectl
-      tag: v1.35.2  # update to your kubernetes version
-    imagePullPolicy: Always
-    timeout: 1h
+    tag: 2.2.0
 
   data:
     pvc:
-      accessModes: ReadWriteMany
-      # storageClass: longhorn # optional... will use default storage class
-      storageRequest: 48Gi  # recommended size of 3x the artifact(s)
+      # optional... uses ReadWriteOnce for standalone and ReadWriteMany for ha
+      accessModes: ""
+      # optional... use default storage class
+      storageClass: ""
+      # holds the store and one copy of it for each server... recommended size of 3x the artifact(s)
+      storageRequest: 48Gi
+      # optional... use an existing pvc
+      existingClaim: ""
+
+  # temporary storage for each server and the debug shell
+  work:
+    ephemeral:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          # optional... uses default storage class
+          # storageClassName: longhorn
+          resources:
+            requests:
+              storage: 4Gi
 
   debug:
     enabled: false
     image:
       repository: hauler/hauler-debug
-      tag: 2.1.1
-    imagePullPolicy: Always
-    command: ["/bin/sh"]
-    args: ["-c", "sleep infinity"]
+      tag: 2.2.0
 
 # Helm Chart Values for the Hauler Jobs
 # Docs: https://docs.hauler.dev/docs/introduction/quickstart
 
 haulerJobs:
-  localNode:  # set the name of the Kube node (kubectl get nodes) which contains the hauls/manifests/stores if using "local.hauls", "local.manifests", or "store" below
-  image:
-    repository: hauler/hauler-debug
-    tag: 2.1.1
-  imagePullPolicy: Always
-  remote:  # remote refers to hauls/manifests accessible via URLs
+  # remote refers to hauls/manifests accessible via URLs
+  remote:
     hauls:
       # - path: https://raw.githubusercontent.com/hauler-dev/hauler/main/testdata/haul.tar.zst
       #   name: remhaul.tar.zst
@@ -54,7 +88,8 @@ haulerJobs:
       #   name: remhauler-manifest.yaml
       # - path: https://path/to/additional-manifests.yaml
       #   name: additional-manifests.yaml
-  local:  # local refers to hauls/manifests accessible via the local filesystem/filepaths/filenames
+  # local refers to hauls/manifests accessible via the local filesystem/filepaths/filenames
+  local:
     hauls:
       # - path: /usr/local/testdata/
       #   name: haul.tar.zst
@@ -67,63 +102,224 @@ haulerJobs:
       #   name: additional-manifests.yaml
   # store refers to a previously created hauler store directory and structure
   # only the filepath is acceptable argument
-  store:  # /path/to/previously/created/hauler/store/directory/
+  # replaces any existing content in the store
+  # /path/to/previously/created/hauler/store/directory/
+  store:
+  # name of the node with the files for "local" and "store" above
+  # must match the node's kubernetes.io/hostname label (kubectl get nodes -L kubernetes.io/hostname)
+  # with ReadWriteOnce, every pod runs on this node
+  localNode:
 
-# Helm Chart Values for the Hauler Fileserver
-# Docs: https://docs.hauler.dev/docs/hauler-usage/store/serve/fileserver
+  # empties the store before loading
+  reset: false
+  # optional... change to rerun the hauler jobs with the same values, i.e. to pull updated remote content
+  revision: ""
+  # optional... extra flags for hauler store sync
+  syncArgs: []
+  #   - --platform
+  #   - linux/amd64
+  # optional... extra flags for hauler store load
+  loadArgs: []
+  # optional... dockerconfigjson secret for private registries
+  registryAuth: ""
 
-haulerFileserver:
-  enabled: true
-  port: 8080  # default port for the fileserver
-  replicas: 1
-  delayStart: 0  # how long for health checks to wait to start checking, 15-second intervals
-  ingress:
-    enabled: true
-    # labels:
-    #   key: value
-    # annotations:
-    #   key: value
-    # ingressClassName: ""  # optional... uses default ingress class
-    hostname: fileserver.ranchers.io
-    tls:
-      enabled: false
-      source: secret         # only supported source
-      secretName: tls-certs  # must be created outside of this chart
+  # used to set up the store and to signal the servers when the hauler jobs complete
+  image:
+    repository: hauler/hauler-debug
+    tag: 2.2.0
+  # how long the servers wait for the hauler jobs to complete
+  timeout: 1h
+  # recommended size of the largest haul
+  tmp:
+    ephemeral:
+      volumeClaimTemplate:
+        spec:
+          accessModes: ["ReadWriteOnce"]
+          # optional... uses default storage class
+          # storageClassName: longhorn
+          resources:
+            requests:
+              storage: 48Gi
 
-  service:
-    enabled: true
-    type: ClusterIP
-    ports:
-      protocol: TCP
-      port: 8080        # default port for the fileserver
-      targetPort: 8080  # default port for the fileserver
+  # optional... resource requests and limits
+  resources: {}
+  # optional... uses global.nodeSelector
+  nodeSelector: {}
+  # optional... uses global.tolerations
+  tolerations: []
 
 # Helm Chart Values for the Hauler Registry
 # Docs: https://docs.hauler.dev/docs/hauler-usage/store/serve/registry
 
 haulerRegistry:
   enabled: true
-  port: 5000  # default port for the registry
-  replicas: 1
-  delayStart: 0  # how long for health checks to wait to start checking, in 15-second intervals
+  # optional... uses 1 for standalone and 3 for ha
+  replicas: ""
+  # default port for the registry
+  port: 5000
+  # pushed content is lost when the store is reloaded
+  readonly: true
+  # optional... extra flags for hauler store serve registry
+  serveArgs: []
 
-  ingress:
-    enabled: true
-    # labels:
-    #   key: value
-    # annotations:
-    #   key: value
-    # ingressClassName: ""  # optional... uses default ingress class
-    hostname: registry.ranchers.io
-    tls:
-      enabled: false
-      source: secret         # only supported source
-      secretName: tls-certs  # must be created outside of this chart
+  tls:
+    # optional... tls secret, must be created outside of this chart
+    secretName: ""
+  basicAuth:
+    # optional... htpasswd secret, must be created outside of this chart
+    secretName: ""
+    # optional... uses hauler-registry
+    realm: ""
 
   service:
     enabled: true
     type: ClusterIP
     ports:
       protocol: TCP
-      port: 5000        # default port for the registry
-      targetPort: 5000  # default port for the registry
+      # default port for the registry
+      port: 5000
+      # default port for the registry
+      targetPort: 5000
+
+  ingress:
+    enabled: true
+    # optional... added to the ingress
+    labels: {}
+    # optional... added to the ingress
+    annotations: {}
+    # optional... uses default ingress class
+    ingressClassName: ""
+    hostname: registry.example.com
+    tls:
+      enabled: false
+      # only supported source
+      source: secret
+      # must be created outside of this chart
+      secretName: tls-certs
+
+  # how long for health checks to wait to start checking, in 15-second intervals
+  delayStart: 40
+
+  # optional... resource requests and limits
+  resources: {}
+  # optional... uses global.nodeSelector
+  nodeSelector: {}
+  # optional... uses global.tolerations
+  tolerations: []
+
+# Helm Chart Values for the Hauler Fileserver
+# Docs: https://docs.hauler.dev/docs/hauler-usage/store/serve/fileserver
+
+haulerFileserver:
+  enabled: true
+  # optional... uses 1 for standalone and 3 for ha
+  replicas: ""
+  # default port for the fileserver
+  port: 8080
+  # optional... extra flags for hauler store serve fileserver
+  serveArgs: []
+  #   - --timeout
+  #   - "120"
+
+  tls:
+    # optional... tls secret, must be created outside of this chart
+    secretName: ""
+  basicAuth:
+    # optional... htpasswd secret, must be created outside of this chart
+    secretName: ""
+    # optional... uses hauler-fileserver
+    realm: ""
+
+  service:
+    enabled: true
+    type: ClusterIP
+    ports:
+      protocol: TCP
+      # default port for the fileserver
+      port: 8080
+      # default port for the fileserver
+      targetPort: 8080
+
+  ingress:
+    enabled: true
+    # optional... added to the ingress
+    labels: {}
+    # optional... added to the ingress
+    annotations: {}
+    # optional... uses default ingress class
+    ingressClassName: ""
+    hostname: fileserver.example.com
+    tls:
+      enabled: false
+      # only supported source
+      source: secret
+      # must be created outside of this chart
+      secretName: tls-certs
+
+  # how long for health checks to wait to start checking, in 15-second intervals
+  delayStart: 40
+
+  # optional... resource requests and limits
+  resources: {}
+  # optional... uses global.nodeSelector
+  nodeSelector: {}
+  # optional... uses global.tolerations
+  tolerations: []
+
+# Helm Chart Values for the Hauler Git Server
+# Docs: https://docs.hauler.dev/docs/hauler-usage/store/serve/git
+
+haulerGit:
+  # requires a git repository in the store... the server exits without one
+  enabled: false
+  # optional... uses 1 for standalone and 3 for ha
+  replicas: ""
+  # default port for the git server
+  port: 8090
+  # optional... extra flags for hauler store serve git
+  serveArgs: []
+
+  tls:
+    # optional... tls secret, must be created outside of this chart
+    secretName: ""
+  basicAuth:
+    # optional... htpasswd secret, must be created outside of this chart
+    secretName: ""
+    # optional... uses hauler-git
+    realm: ""
+
+  service:
+    enabled: true
+    type: ClusterIP
+    ports:
+      protocol: TCP
+      # default port for the git server
+      port: 8090
+      # default port for the git server
+      targetPort: 8090
+
+  ingress:
+    enabled: true
+    # optional... added to the ingress
+    labels: {}
+    # optional... added to the ingress
+    annotations: {}
+    # optional... uses default ingress class
+    ingressClassName: ""
+    hostname: git.example.com
+    tls:
+      enabled: false
+      # only supported source
+      source: secret
+      # must be created outside of this chart
+      secretName: tls-certs
+
+  # how long for health checks to wait to start checking, in 15-second intervals
+  delayStart: 40
+
+  # optional... resource requests and limits
+  resources: {}
+  # optional... uses global.nodeSelector
+  nodeSelector: {}
+  # optional... uses global.tolerations
+  tolerations: []
