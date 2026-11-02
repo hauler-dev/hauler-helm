@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Hauler Documentation
+    url: https://docs.hauler.dev
+    about: review the docs, known limits, and guides before opening an issue
+  - name: Hauler Issues
+    url: https://github.com/hauler-dev/hauler/issues
+    about: report an issue with the hauler cli itself
