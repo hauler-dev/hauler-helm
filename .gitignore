@@ -1,0 +1,22 @@
+# operating system
+**/.DS_Store
+Thumbs.db
+desktop.ini
+
+# editors and ides
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+*.dir-locals.el
+*~
+\#*\#
+.\#*
+
+# claude and ai assistants
+CLAUDE.md
+**/CLAUDE.*
+.claude**
